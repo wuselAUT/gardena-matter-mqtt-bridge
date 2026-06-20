@@ -1,0 +1,6 @@
+{
+  "_comment": "v0.1.4: eindeutiger Pairing-Code pro Gateway, korrekte Web-UI-Installation, vollstaendige MQTT-Sensordaten. Bei neuem Release: tag + sha256 hier per build-bridge-release.sh-Ausgabe aktualisieren.",
+  "repo": "wuselAUT/gardena-matter-mqtt-bridge",
+  "tag": "v0.1.4",
+  "sha256": "03468816a587bb81e576647c2e7007f06cedeb34c9a5124b2d18107beb78a663"
+}

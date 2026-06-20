@@ -1,0 +1,54 @@
+name: docs
+
+# Builds the bilingual (EN/DE) MkDocs documentation site.
+# The build job always runs and validates the site with --strict.
+# The deploy job to GitHub Pages stays dormant until the repo is public and
+# Pages is enabled — flip it on by setting the repository variable
+# ENABLE_PAGES = true (Settings → Secrets and variables → Actions → Variables)
+# and enabling Pages with the "GitHub Actions" source.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'requirements-docs.txt'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements-docs.txt
+      - run: mkdocs build --strict
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    # Stays skipped (no red X) until you opt in by setting ENABLE_PAGES=true.
+    if: vars.ENABLE_PAGES == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

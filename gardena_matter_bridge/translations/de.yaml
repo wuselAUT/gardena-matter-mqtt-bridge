@@ -1,0 +1,40 @@
+#
+# Zweisprachige Options-Beschreibungen (DE). Der HA-Supervisor zeigt je Option
+# Die `configuration`-Keys MÜSSEN deckungsgleich mit den `options` in config.yaml sein.
+configuration:
+  gateway_host:
+    name: "Gateway-Adresse"
+    description: "IP-Adresse oder Hostname deines GARDENA smart Gateways (z. B. GARDENA-123456 oder die IP aus der Router-Geräteliste, z. B. 192.168.1.100). Im Router sichtbar."
+  device_id:
+    name: "Geräte-ID"
+    description: "Die Geräte-ID vom Aufkleber auf der Unterseite des Gateways (z. B. a1b2c3d4-…). Das Login-Passwort wird automatisch aus den ersten 8 Zeichen abgeleitet; der Wert wird als Secret gespeichert und nie geloggt."
+  enable_web_ui:
+    name: "Status-Web-UI anzeigen"
+    description: "Die Status- und Onboarding-Seite des Add-ons in der Home-Assistant-Seitenleiste anzeigen."
+  disable_ssh_after_deploy:
+    name: "SSH nach Deploy sperren"
+    description: "SSH am Gateway nach dem Deploy wieder ausschalten. Der Add-on-Key bleibt installiert und übersteht Firmware-Updates."
+  github_repo:
+    name: "Bridge-Release-Repository"
+    description: "GitHub-Repository (owner/name), das das signierte Bridge-Release zum Deployen bereitstellt."
+  release_tag:
+    name: "Release-Tag"
+    description: "Welches Bridge-Release deployt wird — ‚latest' oder ein bestimmtes Versions-Tag."
+  github_token:
+    name: "GitHub-Token (privates Repo)"
+    description: "Optional. Nur nötig, solange das Bridge-Release-Repository privat ist: ein GitHub-Token mit Lesezugriff, um das Release-Asset herunterzuladen. Für ein öffentliches Repository leer lassen. Der Token wird als Secret gespeichert und nie geloggt."
+  enable_mqtt:
+    name: "MQTT-Publisher aktivieren"
+    description: "MQTT-Publisher-Dienst parallel zur Matter-Bridge starten. Beide laufen unabhängig — das Deaktivieren eines Dienstes beeinträchtigt den anderen nicht. Voraussetzung: ein MQTT-Broker im lokalen Netzwerk (kein Broker wird auf dem Gateway installiert)."
+  mqtt_broker_host:
+    name: "MQTT-Broker-Adresse"
+    description: "IP-Adresse oder Hostname des MQTT-Brokers (z. B. 192.168.1.10 oder homeassistant.local). Leer lassen, wenn MQTT deaktiviert ist."
+  mqtt_broker_user:
+    name: "MQTT-Benutzername"
+    description: "Benutzername für die Authentifizierung am MQTT-Broker. Leer lassen, wenn der Broker keine Authentifizierung erfordert."
+  mqtt_broker_password:
+    name: "MQTT-Passwort"
+    description: "Passwort für den MQTT-Broker. Wird als Secret gespeichert und nie geloggt oder angezeigt. Leer lassen, wenn der Broker keine Authentifizierung erfordert."
+  mqtt_topic_prefix:
+    name: "MQTT-Topic-Präfix"
+    description: "Präfix für alle vom Gateway publizierten MQTT-Topics (Standard: gardena). Gerätezustand-Topics folgen dem Schema <präfix>/<geräte-hash>/<ressource>/state. Der Geräte-Hash ist ein 4-stelliger FNV-16-Fingerabdruck der Seriennummer — nie die rohe Seriennummer."

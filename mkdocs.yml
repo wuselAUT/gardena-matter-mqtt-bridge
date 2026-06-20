@@ -1,0 +1,78 @@
+site_name: GARDENA Matter Bridge
+site_description: Make the GARDENA smart Gateway speak Matter — locally, without the cloud.
+site_url: https://wuselaut.github.io/gardena-matter-bridge/
+repo_url: https://github.com/wuselAUT/gardena-matter-bridge
+repo_name: wuselAUT/gardena-matter-bridge
+edit_uri: edit/main/docs/
+copyright: Community research project — use at your own risk. Not affiliated with GARDENA / Husqvarna.
+
+theme:
+  name: material
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: green
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: green
+      accent: green
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - content.action.edit
+    - search.highlight
+    - search.suggest
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: de
+          name: Deutsch
+          build: true
+          nav_translations:
+            Home: Start
+            Getting Started: Inbetriebnahme
+            Manual: Handbuch
+            Technical Background: Technische Lage
+            Contributing: Mitwirken
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Manual: manual.md
+  - Roadmap: roadmap.md
+  - Technical Background: technical.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true

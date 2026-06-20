@@ -1,0 +1,38 @@
+Gardena Matter Bridge
+Copyright 2026 Jörg Weber and the Gardena Matter Bridge contributors
+
+Licensed under the Apache License, Version 2.0 (the "License"); see the
+LICENSE file. You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------
+Trademarks / affiliation
+--------------------------------------------------------------------------
+This is an independent community project. It is NOT affiliated with,
+authorized by, endorsed by, or sponsored by GARDENA or Husqvarna.
+
+"GARDENA" and "Husqvarna" are trademarks of their respective owners. They
+are used here only nominatively, to describe compatibility (i.e. to state
+which devices this software works with). No claim of ownership is made.
+
+--------------------------------------------------------------------------
+Third-party software
+--------------------------------------------------------------------------
+This project builds upon and/or interoperates with third-party software,
+each under its own license, including:
+
+  * Matter SDK (Project CHIP / connectedhomeip),
+    Connectivity Standards Alliance and contributors — Apache License 2.0.
+  * Husqvarna smart-garden-gateway components and the local API
+    (smart-garden-gateway-websocketd, gardena-smart-local-api) — see the
+    respective upstream repositories for their licenses.
+
+This software does not redistribute the above components; it is built
+against them and/or communicates with them at runtime. Their copyrights and
+licenses remain with their respective owners.
+
+--------------------------------------------------------------------------
+Disclaimer
+--------------------------------------------------------------------------
+Use at your own risk. Installing custom software on a gateway may void its
+warranty. See the documentation for details.

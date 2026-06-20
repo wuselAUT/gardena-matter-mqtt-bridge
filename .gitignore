@@ -1,0 +1,25 @@
+# Geräte-Identität / Secrets — niemals ins öffentliche Repo
+*.id
+*gateway-id*
+*.key
+*.pem
+id_ed25519*
+secrets.*
+.env
+
+# Yocto / Build-Artefakte
+build/
+tmp/
+sstate-cache/
+downloads/
+*.squashfs*
+*.bin
+
+# Doku-Site (MkDocs Material) — generierter Output, nicht versionieren
+site/
+.cache/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp

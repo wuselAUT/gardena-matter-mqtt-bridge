@@ -1,0 +1,13 @@
+# build.yaml — per-Arch Base-Images fuer das Add-on (HA-Supervisor Build)
+# https://developers.home-assistant.io/docs/add-ons/configuration/#add-on-dockerfile
+#
+# 15.0.7 ist veraltet (seit Supervisor 2026.04 kein BUILD_FROM-Fallback mehr) UND
+# auf 18.2.0 baut/startet das Image on-device sauber (live verifiziert). Der
+# apk/libssl3-Pin-Konflikt (Base pinnt libssl3=3.5.4, openssl-CLI braucht 3.5.7)
+# wird zusaetzlich durch das Entfernen des openssl-CLI im Dockerfile geloest.
+build_from:
+  aarch64: ghcr.io/hassio-addons/base:18.2.0
+  amd64: ghcr.io/hassio-addons/base:18.2.0
+  armhf: ghcr.io/hassio-addons/base:18.2.0
+  armv7: ghcr.io/hassio-addons/base:18.2.0
+  i386: ghcr.io/hassio-addons/base:18.2.0

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GARDENA Matter &amp; MQTT Bridge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>GARDENA Matter &amp; MQTT Bridge</h1>
+
+    <section id="deploy-card" class="card">
+      <h2>Deploy-Status</h2>
+      <p id="deploy-state" class="badge">…</p>
+      <p id="deploy-message"></p>
+      <ol id="deploy-steps"></ol>
+      <button id="redeploy-btn" type="button">Neu deployen</button>
+      <p id="deploy-hint" class="hint"></p>
+      <p id="done-note" class="done-note" hidden></p>
+    </section>
+
+    <section id="bridge-card" class="card">
+      <h2>Bridge-Status</h2>
+      <p id="bridge-summary">…</p>
+      <p>Gateway: <span id="gateway-host">—</span></p>
+      <p>Aktualisiert: <span id="updated-at">—</span></p>
+    </section>
+
+    <section id="commissioning-card" class="card">
+      <h2>In Home Assistant hinzufügen (Matter)</h2>
+      <p class="instructions">
+        So fügst du das Gateway als Matter-Gerät hinzu:
+      </p>
+      <ol class="instructions">
+        <li>In Home Assistant: <strong>Einstellungen → Geräte &amp; Dienste → Gerät hinzufügen → Matter</strong>.</li>
+        <li>Den unten gezeigten <strong>Setup-Code</strong> eingeben (oder den QR-Code scannen).</li>
+        <li>Den Anweisungen in Home Assistant folgen — die GARDENA-Geräte erscheinen als Untergeräte.</li>
+      </ol>
+      <div id="commissioning-data">
+        <p>Setup-Code: <code id="manual-code">—</code></p>
+        <p>QR-Payload: <code id="qr-payload">—</code></p>
+        <p id="commissioning-window"></p>
+      </div>
+      <p class="hint">
+        Hinweis: Das Add-on zeigt den Code nur an (halb-manuell). Das eigentliche
+        Commissioning übernimmt Home Assistant.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Gateway-Seite</h2>
+      <p>
+        <a id="gateway-link" href="#" target="_blank" rel="noopener">
+          Matter-Seite auf dem Gateway öffnen
+        </a>
+        (QR + Toggle)
+      </p>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
