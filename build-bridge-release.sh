@@ -127,12 +127,94 @@ for f in "${WEB_UI_RUNTIME_FILES[@]}"; do
     fi
 done
 
-# -- Version/Build-Hash bestimmen (== Footer-Logik) -----------------------
-VERSION=""
-if git -C "${REPO_ROOT}" rev-parse --short HEAD >/dev/null 2>&1; then
-    VERSION="$(git -C "${REPO_ROOT}" rev-parse --short HEAD 2>/dev/null || true)"
+#
+# Zwei unabhaengige Pruefungen, BEIDE muessen bestehen:
+#
+#  Gate A — Endpunkt-Selbsttest (semantisch):
+#    grep -a sucht im Binary nach den C-String-Literalen der MQTT-Endpunkte.
+#    Wenn /mqtt-config ODER /mqtt-status fehlt, ist der eingecheckte Binary veraltet
+#    (er wurde nach der Erweiterung NICHT neu kompiliert) → Release ABBRUCH.
+#    "-a" behandelt das Binary als Text (portabel: busybox grep auf Build-Host).
+#
+#  Gate B — Timestamps (defensiv, Fruehwarnung):
+#    Vergleicht die letzte git-Commit-Zeit der Quelldatei vs. des Binaries.
+#    Quelle neuer als Binary -> Warnung; kombiniert mit Gate-A bildet dies einen
+#    starken Schutz. (mtime-Fallback falls git nicht verfuegbar.)
+#
+# Fail-closed: jeder Fehler bricht den Release-Build mit exit 1 ab.
+# Kein Cross-Build in diesem Skript — Toggle muss VORHER auf dem Build-Host
+# kompiliert worden sein (build_toggle.sh). Das Gate ist ein GUARD, kein Builder.
+
+TOGGLE_BIN="${WEB_UI_SRC}/gardena-toggle"
+TOGGLE_SRC="${WEB_UI_SRC}/gardena-toggle.c"
+
+log "=== T2 Regressions-Gate: stale Toggle pruefen ==="
+
+# Gate A: Endpunkt-Selbsttest
+log "  Gate A: Endpunkt-Selbsttest (/mqtt-config, /mqtt-status) ..."
+GATE_A_PASS=1
+for endpoint in "/mqtt-config" "/mqtt-status"; do
+    if ! grep -qa "${endpoint}" "${TOGGLE_BIN}" 2>/dev/null; then
+        err "Regressions-Gate A FEHLGESCHLAGEN: Endpunkt '${endpoint}' nicht im Toggle-Binary gefunden."
+        err "  Binary: ${TOGGLE_BIN}"
+        err "  Der eingecheckte 'gardena-toggle' ist VERALTET — er wurde nach der MQTT-Erweiterung"
+        err "  (gardena-toggle.c) NICHT NEU KOMPILIERT. Fehler: MQTT-Karte gibt HTTP 404."
+        err ""
+        err "  Behebung: auf dem Build-Host ausfuehren:"
+        err "    cd /home/nextcloud/gardena-matter-gateway"
+        err "    source /home/nextcloud/gardena-matter-build/sdk-oldsoft-host/environment-setup-mips32r2el-24kc-nf-gardena-linux"
+        err "    bash matter/web-ui/build_toggle.sh"
+        err "    git add matter/web-ui/gardena-toggle && git commit -m 'build: Toggle neu kompiliert (Endpunkte)' && git push"
+        err "  Dann dieses Skript erneut ausfuehren."
+        GATE_A_PASS=0
+    fi
+done
+if [ "${GATE_A_PASS}" -eq 0 ]; then
+    exit 1
 fi
-[ -n "${VERSION}" ] || VERSION="${TAG}"
+log "  Gate A: OK — /mqtt-config + /mqtt-status beide im Binary gefunden."
+
+# Gate B: Timestamp-Vergleich (Quellcode neuer als Binary = Warnung + Abbruch)
+log "  Gate B: Timestamp-Vergleich (Quelle vs. Binary) ..."
+SRC_TIME=""
+BIN_TIME=""
+if git -C "${REPO_ROOT}" rev-parse HEAD >/dev/null 2>&1; then
+    SRC_TIME="$(git -C "${REPO_ROOT}" log -1 --format='%ct' -- "${TOGGLE_SRC}" 2>/dev/null || true)"
+    BIN_TIME="$(git -C "${REPO_ROOT}" log -1 --format='%ct' -- "${TOGGLE_BIN}" 2>/dev/null || true)"
+fi
+# Fallback: mtime (wenn git-Zeiten nicht ermittelbar)
+if [ -z "${SRC_TIME}" ]; then
+    SRC_TIME="$(stat -c%Y "${TOGGLE_SRC}" 2>/dev/null || stat -f%m "${TOGGLE_SRC}" 2>/dev/null || echo 0)"
+fi
+if [ -z "${BIN_TIME}" ]; then
+    BIN_TIME="$(stat -c%Y "${TOGGLE_BIN}" 2>/dev/null || stat -f%m "${TOGGLE_BIN}" 2>/dev/null || echo 0)"
+fi
+if [ -n "${SRC_TIME}" ] && [ -n "${BIN_TIME}" ] && \
+   [ "${SRC_TIME}" != "0" ] && [ "${BIN_TIME}" != "0" ]; then
+    if [ "${SRC_TIME}" -gt "${BIN_TIME}" ]; then
+        err "Regressions-Gate B FEHLGESCHLAGEN: gardena-toggle.c ist NEUER als das eingecheckte Binary."
+        err "  gardena-toggle.c zuletzt geaendert (git/mtime): ${SRC_TIME}"
+        err "  gardena-toggle    zuletzt geaendert (git/mtime): ${BIN_TIME}"
+        err "  Gate A ist bereits gruen (Endpunkte gefunden) — dennoch Abbruch: Quelle neuer als Binary"
+        err "  bedeutet, dass moeglicherweise weitere Aenderungen nicht im Binary sind."
+        err "  Behebung: Toggle neu kompilieren (build_toggle.sh auf Build-Host) und committen."
+        exit 1
+    fi
+    log "  Gate B: OK — Binary ist nicht aelter als Quelle (src=${SRC_TIME} bin=${BIN_TIME})."
+else
+    log "  Gate B: SKIPPED — Timestamps nicht ermittelbar (kein git / stat fehlgeschlagen)."
+fi
+
+log "=== Regressions-Gate BESTANDEN — Toggle-Binary aktuell. ==="
+
+# VERSION = TAG (z.B. v0.1.5) — damit zeigt install_web_ui.sh beim Bundle-Deploy
+# die echte Release-Version im Footer (statt git-SHA oder "dev").
+# GIT_SHA = nur fuer das Log (Traceability), nicht in der VERSION-Datei.
+VERSION="${TAG}"
+GIT_SHA=""
+if git -C "${REPO_ROOT}" rev-parse --short HEAD >/dev/null 2>&1; then
+    GIT_SHA="$(git -C "${REPO_ROOT}" rev-parse --short HEAD 2>/dev/null || true)"
+fi
 
 # -- Staging-Verzeichnis aufbauen ---------------------------------------------
 mkdir -p "${OUT_DIR}"
@@ -207,7 +289,8 @@ SHA256="$(sha256sum "${BUNDLE}" | awk '{print $1}')"
 log "Bundle fertig:"
 log "  Pfad    : ${BUNDLE}"
 log "  Tag     : ${TAG}"
-log "  Version : ${VERSION}"
+log "  Version : ${VERSION} (in Bundle-VERSION-Datei; Footer zeigt diese Version)"
+log "  Git-SHA : ${GIT_SHA:-unbekannt} (nur Log, nicht in VERSION-Datei)"
 log "  SHA256  : ${SHA256}"
 log ""
 log "Naechster Schritt (Maintainer, NICHT dieser Lauf):"

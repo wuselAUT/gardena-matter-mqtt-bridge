@@ -107,20 +107,54 @@ log "=== Overlay-Verzeichnisse anlegen ==="
 ssh ${SSH_OPTS} "${GW}" "mkdir -p ${INSTALL_DIR} && mkdir -p ${ASSETS_DST}"
 
 # ── __BUILD_VERSION__ im matter.html ersetzen ─────────────────────────
-# Platzhalter __BUILD_VERSION__ -> 'git rev-parse --short HEAD' (Fallback: VERSION-Datei oder 'dev')
+# Platzhalter __BUILD_VERSION__ -> echte Release-Version (kein "dev" bei Deploy aus Bundle).
+#
+#   1. WEB_UI_SRC/../VERSION  — Bundle-Root (z. B. /tmp/unpack/VERSION); greift beim
+#      Add-on-Deploy aus dem Tarball (orchestrate.py entpackt nach <unpack_dir>/,
+#      setzt WEB_UI_SRC=<unpack_dir>/web-ui → ../VERSION = <unpack_dir>/VERSION).
+#   2. SCRIPT_DIR/../VERSION  — naechstes Verzeichnis relativ zum Skript (Overlay-Deploy).
+#   3. git rev-parse --short HEAD  — wenn ein git-Repo vorhanden (Dev-Lauf, Build-Host).
+#   4. "dev"  — echter Fallback, nur wenn weder Bundle-VERSION noch git vorhanden.
+#
+# Dadurch zeigt der Footer nach Tarball-Deploy immer "vX.Y.Z" statt "dev".
 log "=== Build-Version einsetzen ==="
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BUILD_VERSION=""
-if git -C "${REPO_ROOT}" rev-parse --short HEAD >/dev/null 2>&1; then
-    BUILD_VERSION="$(git -C "${REPO_ROOT}" rev-parse --short HEAD 2>/dev/null || true)"
+
+# Suchpfad 1: Bundle-Root (WEB_UI_SRC/../VERSION — greift beim Add-on-Deploy aus Tarball)
+BUNDLE_ROOT="$(cd "${WEB_UI_SRC}/.." && pwd)"
+if [ -f "${BUNDLE_ROOT}/VERSION" ]; then
+    BUILD_VERSION="$(tr -d '[:space:]' < "${BUNDLE_ROOT}/VERSION")"
+    log "  BUILD_VERSION (Bundle-Root ${BUNDLE_ROOT}/VERSION) = ${BUILD_VERSION}"
 fi
-if [ -z "${BUILD_VERSION}" ] && [ -f "${REPO_ROOT}/VERSION" ]; then
-    BUILD_VERSION="$(cat "${REPO_ROOT}/VERSION" | tr -d '[:space:]')"
+
+# Suchpfad 2: Skript-Verzeichnis-Elternteil (Overlay-Deploy ohne Bundle-Root)
+if [ -z "${BUILD_VERSION}" ]; then
+    SCRIPT_PARENT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+    if [ -f "${SCRIPT_PARENT}/VERSION" ]; then
+        BUILD_VERSION="$(tr -d '[:space:]' < "${SCRIPT_PARENT}/VERSION")"
+        log "  BUILD_VERSION (Script-Parent ${SCRIPT_PARENT}/VERSION) = ${BUILD_VERSION}"
+    fi
 fi
+
+# Suchpfad 3: git rev-parse (Dev-Lauf / Build-Host — kein Tarball-Deploy)
+if [ -z "${BUILD_VERSION}" ]; then
+    # Suche nach git-Repo im WEB_UI_SRC oder darueber
+    for _git_dir in "${BUNDLE_ROOT}" "$(cd "${BUNDLE_ROOT}/.." 2>/dev/null && pwd || echo "")"; do
+        if [ -n "${_git_dir}" ] && git -C "${_git_dir}" rev-parse --short HEAD >/dev/null 2>&1; then
+            BUILD_VERSION="$(git -C "${_git_dir}" rev-parse --short HEAD 2>/dev/null || true)"
+            log "  BUILD_VERSION (git rev-parse in ${_git_dir}) = ${BUILD_VERSION}"
+            break
+        fi
+    done
+fi
+
+# Suchpfad 4: echter Fallback
 if [ -z "${BUILD_VERSION}" ]; then
     BUILD_VERSION="dev"
+    log "  BUILD_VERSION = dev (Fallback — kein Bundle/VERSION/git gefunden)"
 fi
-log "  BUILD_VERSION = ${BUILD_VERSION}"
+
+log "  BUILD_VERSION final = ${BUILD_VERSION}"
 
 # Temporaere Kopie mit ersetztem Platzhalter erzeugen (Original bleibt unveraendert)
 MATTER_HTML_TMP="/tmp/matter_$$.html"
