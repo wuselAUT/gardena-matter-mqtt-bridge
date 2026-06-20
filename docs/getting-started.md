@@ -32,10 +32,10 @@ Click the badge below or go to **Home Assistant → Settings → Add-ons → Add
 tap the three-dot menu → **Repositories** → paste the URL:
 
 ```
-https://github.com/wuselAUT/gardena-matter-bridge
+https://github.com/wuselAUT/gardena-matter-mqtt-bridge
 ```
 
-[![Add add-on repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-bridge)
+[![Add add-on repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 
 !!! note "Honest ~3 steps, not 1"
     Home Assistant cannot install a third-party add-on without your confirmation. After
@@ -143,7 +143,7 @@ off.**
 Steps for Option B:
 
 1. **Download** `gardena-paa-cert.pem` from the
-   [latest release](https://github.com/wuselAUT/gardena-matter-bridge/releases).
+   [latest release](https://github.com/wuselAUT/gardena-matter-mqtt-bridge/releases).
 
 2. **Add it to the HA Matter Server credential store.** The Matter Server reads from
    `--paa-root-cert-dir` (default `/data/credentials`):

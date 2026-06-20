@@ -1,12 +1,17 @@
-# gardena-matter-bridge
+# GARDENA Matter & MQTT Bridge
 
-> **Mach das GARDENA smart Gateway Matter-fähig — lokal, ohne Cloud.**
+> **Bring das GARDENA smart Gateway dazu, Matter & MQTT zu sprechen — lokal, ohne Cloud.**
 
 [🌍 English](README.md) · 🇩🇪 **Deutsch** · 📖 Vollständige Doku (EN/DE): **[Doku-Site](docs/index.de.md)**
 
 Das **GARDENA smart Gateway (Art. 19005)** zu einem eigenständigen **Matter-Gerät** machen:
 GARDENA-Geräte erscheinen lokal in jedem Matter-Fabric (Home Assistant, Apple Home, Google Home)
 — **ohne GARDENA-Cloud, ohne zweiten Server**. Der Matter-Stack läuft **direkt auf dem Gateway**.
+
+Zusätzlich zu Matter kann die Bridge **optional jeden Sensorwert per MQTT veröffentlichen** — über
+die Home-Assistant-MQTT-Discovery (additiv — Matter läuft weiter, kein zusätzliches Commissioning
+nötig). So bekommst du deine Geräte **auf zwei Wegen** in Home Assistant: nativ als Matter und als
+reichhaltige MQTT-Entitäten.
 
 > **Status: funktionsfähig.** Die Bridge erkennt automatisch alle GARDENA-Geräte am Gateway
 > (Sensoren, Mäher und weitere — automatisch anhand der Modellnummer, keine Konfiguration nötig).
@@ -23,12 +28,12 @@ GARDENA-Geräte erscheinen lokal in jedem Matter-Fabric (Home Assistant, Apple H
 
 ## Schnell-Installation (Home Assistant)
 
-Repository zu Home Assistant hinzufügen und das Add-on **GARDENA Matter Bridge** installieren —
+Repository zu Home Assistant hinzufügen und das Add-on **GARDENA Matter & MQTT Bridge** installieren —
 kein SSH, kein Bauen, keine Kommandozeile.
 
-[![Add-on-Repository zu Home Assistant hinzufügen](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-bridge)
+[![Add-on-Repository zu Home Assistant hinzufügen](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 
-[![GARDENA Matter Bridge Add-on in Home Assistant öffnen](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=gardena_matter_bridge&repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-bridge)
+[![GARDENA Matter & MQTT Bridge Add-on in Home Assistant öffnen](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=gardena_matter_bridge&repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 
 Vollständige Schritt-für-Schritt-Anleitung: **[Inbetriebnahme](docs/getting-started.de.md)**.
 
@@ -41,6 +46,7 @@ mit Sprachschalter gebaut. **Englisch ist die kanonische Quelle.**
 |---|---|
 | 🚀 **[Inbetriebnahme](docs/getting-started.de.md)** | Vom Karton zum funktionierenden Matter-Gerät — Add-on-Install, ohne SSH-/Build-Wissen. |
 | 📘 **[Handbuch](docs/manual.de.md)** | Technische Referenz: SSH, Build, Flashen. |
+| 📡 **[MQTT](docs/mqtt.de.md)** | Der optionale MQTT-Publisher und die Home-Assistant-MQTT-Discovery. |
 | 🔬 **[Technische Lage](docs/technical.de.md)** | Hardware, Software-Architektur, Machbarkeits-Verdict. |
 | 🤝 **[Mitwirken](docs/contributing.de.md)** | Was in dieser frühen Phase am meisten hilft. |
 
@@ -51,8 +57,8 @@ pip install -r requirements-docs.txt
 mkdocs serve         # http://127.0.0.1:8000  (Sprachschalter oben rechts)
 ```
 
-Die Site wird über die `docs`-GitHub-Action nach GitHub Pages veröffentlicht, sobald das Repo
-öffentlich ist und Pages aktiviert wurde (Repo-Variable `ENABLE_PAGES=true` setzen).
+Die Site wird über die `docs`-GitHub-Action nach GitHub Pages veröffentlicht, sobald Pages aktiviert
+ist (Repo-Variable `ENABLE_PAGES=true` setzen und als Pages-Quelle „GitHub Actions" wählen).
 
 ## Getestete Hardware
 

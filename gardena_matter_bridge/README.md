@@ -1,11 +1,10 @@
 # GARDENA Matter & MQTT Bridge — Home Assistant add-on
 
-[![Add the repository to your Home Assistant.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
+[![Add the repository to your Home Assistant.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 [![Open this add-on in your Home Assistant.](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=gardena_matter_bridge&repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 
 > **One-click install:** the left button adds this add-on repository to Home Assistant, the right one jumps
-> straight to the add-on page. **Active from go-live (public release):** the buttons point at the public repo
-> `wuselAUT/gardena-matter-mqtt-bridge` — while it is still private, the click leads nowhere yet.
+> straight to the add-on page. Both point at the public repo `wuselAUT/gardena-matter-mqtt-bridge`.
 
 Installs the **GARDENA Matter & MQTT Bridge** on the GARDENA smart Gateway (19005)
 — **no SSH, no building, no copy-pasting code**. You only enter the **device ID**
@@ -96,8 +95,7 @@ This add-on first lives in the **private** workshop repo. The public migration
 # GARDENA Matter & MQTT Bridge — Home-Assistant-Add-on
 
 > **Ein-Klick-Installation:** Der linke Button (oben) fügt dieses Add-on-Repository zu Home Assistant hinzu, der
-> rechte springt direkt zur Add-on-Seite. **Aktiv ab der Public-Schaltung** (Go-Live): Die Buttons zeigen auf das
-> öffentliche Repo `wuselAUT/gardena-matter-mqtt-bridge` — solange es privat ist, läuft der Klick noch ins Leere.
+> rechte springt direkt zur Add-on-Seite. Beide zeigen auf das öffentliche Repo `wuselAUT/gardena-matter-mqtt-bridge`.
 
 Installiert die **GARDENA Matter & MQTT Bridge** auf dem GARDENA smart Gateway (19005)
 — **ohne SSH, ohne Bauen, ohne Code-Abtippen**. Du trägst nur die **Geräte-ID**

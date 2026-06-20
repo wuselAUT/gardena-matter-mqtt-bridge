@@ -1,207 +1,114 @@
-# GARDENA Matter & MQTT Bridge — Home Assistant add-on
+# GARDENA Matter & MQTT Bridge
 
-[![Add the repository to your Home Assistant.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
-[![Open this add-on in your Home Assistant.](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=gardena_matter_bridge&repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
+> **Make the GARDENA smart Gateway speak Matter & MQTT — local, no cloud.**
 
-> **One-click install:** the left button adds this add-on repository to Home Assistant, the right one jumps
-> straight to the add-on page. **Active from go-live (public release):** the buttons point at the public repo
-> `wuselAUT/gardena-matter-mqtt-bridge` — while it is still private, the click leads nowhere yet.
+🌍 **English** · [🇩🇪 Deutsch](README.de.md) · 📖 Full docs (EN/DE): **[Docs site](docs/index.md)**
 
-Installs the **GARDENA Matter & MQTT Bridge** on the GARDENA smart Gateway (19005)
-— **no SSH, no building, no copy-pasting code**. You only enter the **device ID**
-from the sticker (the login password is its first 8 characters, the add-on
-derives it automatically); the add-on enables SSH through the official gateway
-endpoint, downloads the pre-built bridge from a signed GitHub release and deploys
-it. Afterwards you add the gateway to Home Assistant as a **Matter device**.
+Turn the **GARDENA smart Gateway (Art. 19005)** into a standalone **Matter device**:
+your GARDENA devices appear locally in any Matter fabric (Home Assistant, Apple Home, Google Home)
+— **no GARDENA cloud, no second server**. The Matter stack runs **directly on the gateway**.
 
-The bridge exposes your GARDENA devices to Home Assistant **two ways**: as native
-**Matter** devices (soil sensors + mower), and — optionally — by publishing **all**
-sensor values (incl. signal strength, measurement interval, …) over **MQTT** using
-Home Assistant MQTT discovery (additive, no commissioning needed; Matter is not affected).
+On top of Matter, the bridge can **optionally publish every sensor value over MQTT** using Home
+Assistant MQTT discovery (additive — Matter keeps working, no extra commissioning needed). So you
+get your devices into Home Assistant **two ways**: native Matter, and rich MQTT entities.
 
-> **Status:** the add-on skeleton, the SSH/deploy orchestration, the commissioning
-> display and the status UI are built and unit-tested. **The deploy is now active**
-> — pressing *Re-deploy* runs the real download + SSH deploy (hash-pinned,
-> fail-closed). The **first real deploy onto a gateway and the Matter commissioning
-> in HA are still done together with the user as a live test**.
+> **Status: working.** The bridge automatically discovers every GARDENA device on the gateway
+> (sensors, mowers and more — recognised from the model number, no configuration needed).
+> Soil temperature, soil moisture, battery and mower status appear in Home Assistant.
+> Devices that come or go during operation are picked up automatically.
+> Binary ~1.9 MiB, runs on the gateway, reboot-proof.
 
-## What it does
+> **⚠️ Disclaimer.** This is a **private hobby project** — **use entirely at your own risk**.
+> It is **not affiliated with GARDENA or Husqvarna** and is neither supported nor endorsed by them.
+> "GARDENA" and product names are trademarks of their respective owners and are used here only for
+> identification. The software is provided **"as is", without any warranty**; you alone are
+> responsible for any use and for any damage to devices, gateway, data or otherwise.
+> See [LICENSE](LICENSE).
 
-1. **Enable SSH on the gateway** — via the official `/ssh_access_*` flow (no raw
-   SSH hack). The add-on generates its own SSH keypair and sends only the
-   **public key** to the gateway.
-2. **Deploy the bridge** — the three install scripts
-   (`install_bridge.sh`, `install_web_ui.sh`, `install_restore.sh`) are
-   run idempotently. The bridge artifact comes from a **GitHub release** and is
-   checked by **SHA-256 hash** before the deploy (hard integrity gate; a
-   cryptographic signature is an optional extra step).
-3. **Show commissioning** — the QR code and setup code are shown in the add-on
-   UI; you enter them in Home Assistant under *Add device → Matter*.
+## Quick install (Home Assistant)
 
-## Options
+Add the repository to Home Assistant and install the **GARDENA Matter & MQTT Bridge** add-on —
+no SSH, no building, no command line.
 
-| Option | Type | Meaning |
-|---|---|---|
-| `gateway_host` | str | IP/hostname of the gateway (e.g. `GARDENA-123456` or `192.168.1.100`) |
-| `device_id` | password (secret) | Device ID from the sticker on the underside of the gateway (e.g. `a1b2c3d4-…`). The login password is derived automatically from its **first 8 characters**; the value is stored as a secret and **never logged**. |
-| `enable_web_ui` | bool | Enable the ingress status UI (default: on) |
-| `disable_ssh_after_deploy` | bool | Turn SSH back off after the deploy (the key stays installed and survives firmware updates) |
-| `github_repo` | str | Source of the bridge release (`owner/name`) |
-| `release_tag` | str | Release tag (default `v0.1.4`, matching the pinned `bridge-release.lock`) |
-| `github_token` | password (secret) | Optional. Only needed while the bridge release repo is **private**: a GitHub token with read access to download the release asset. Leave empty for a public repo. Stored as a secret and **never logged**. |
+[![Add the add-on repository to your Home Assistant.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 
-## Onboarding (steps)
+[![Open the GARDENA Matter & MQTT Bridge add-on in your Home Assistant.](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?addon=gardena_matter_bridge&repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 
-1. Add the add-on repository in Home Assistant (repo URL → *Add-on Store → ⋮ → Repositories*).
-2. Install **GARDENA Matter & MQTT Bridge**.
-3. In the add-on **options**, set `gateway_host` and `device_id` (device ID from
-   the sticker), save. The login password is derived automatically from the
-   first 8 characters of the device ID — no separate password field.
-4. **Start** the add-on and open the **web UI** (ingress, sidebar).
-5. Trigger the **deploy** (re-deploy button).
-6. Enter the QR/setup code from the UI in Home Assistant under
-   *Settings → Devices & services → Add device → Matter*.
+Full step-by-step walkthrough: **[Getting started](docs/getting-started.md)**.
 
-## After installation
+## Documentation
 
-**The add-on is an installer/updater — not a runtime component.** Once the deploy
-has finished, the bridge runs **standalone on the gateway**: it is reboot-proof
-and survives firmware updates (OTA) via the restore service. Matter then talks
-**directly gateway ↔ Home Assistant** — the add-on is **not in the data path**.
+The docs are **bilingual (English / German)** and built as a [MkDocs Material](https://squidfunk.github.io/mkdocs-material/)
+site with a language switcher. **English is the canonical source.**
 
-This means:
+| | |
+|---|---|
+| 🚀 **[Getting started](docs/getting-started.md)** | From the box to a working Matter device — add-on install, no SSH/build knowledge. |
+| 📘 **[Manual](docs/manual.md)** | Technical reference: SSH, build, flashing. |
+| 📡 **[MQTT](docs/mqtt.md)** | The optional MQTT publisher and Home Assistant MQTT discovery. |
+| 🔬 **[Technical status](docs/technical.md)** | Hardware, software architecture, feasibility verdict. |
+| 🤝 **[Contributing](docs/contributing.md)** | What helps most at this early stage. |
 
-- You may **stop or even uninstall** this add-on after a successful deploy — the
-  **pairing stays intact** and the GARDENA devices keep working in Home Assistant.
-- **Re-open / start it again only** to update the bridge to a new release, or to
-  re-deploy after a factory reset of the gateway.
-- The **pairing QR / setup code** and the **Matter on/off** toggle are also
-  available **directly on the gateway's own page** (`/assets/matter.html`),
-  without the add-on.
+### Build the docs site locally
 
-## Security
+```bash
+pip install -r requirements-docs.txt
+mkdocs serve         # http://127.0.0.1:8000  (language switcher, top right)
+```
 
-- The sticker password is a **HA secret** and is **never logged**, never
-  committed, never mirrored into error messages.
-- The add-on runs in **Home Assistant**, not on the gateway — the GARDENA cloud
-  is not touched.
-- Reversible: the bridge is deployed into the writable overlay (no flash, no
-  slot change). Uninstall scripts are provided.
+The site is published to GitHub Pages by the `docs` GitHub Action once Pages is enabled
+(set the repository variable `ENABLE_PAGES=true` and select the "GitHub Actions" Pages source).
 
-## Compatibility & status
+## Tested hardware
 
-- **Tested with Home Assistant** (Matter for sensors + mower, and the optional MQTT
-  publisher). This is what the bridge is developed and verified against.
-- **Apple Home and Google Home were *not* tested.** Other Matter controllers may show
-  the gateway as an *uncertified* / *unknown vendor* device, with limited or no
-  functionality. If you try them, treat it as experimental.
-- **Hobby project — no warranty, use at your own risk.** It runs on the gateway's
-  writable overlay (no flashing, no slot change) and is reversible, but you are
-  responsible for your own devices.
+This bridge is developed and verified against my own, real GARDENA hardware:
 
----
+- **GARDENA smart Gateway (Art. 19005)** — the Matter stack runs directly on this gateway.
+- **GARDENA smart sensors** — soil moisture, temperature and battery. Every sensor in the test
+  set is discovered automatically; there is no fixed device list in the code.
+- **1 × GARDENA SILENO robotic mower** — status and battery, read-only as a Matter `vacuum`
+  (no actuation, for garden safety).
 
-## 🇩🇪 Deutsch
+Everything else in the device model — **water control / valves, irrigation control, the pressure
+pump, the smart power plug and further sensor and mower variants** — is already modelled in code,
+but **not yet verified against real hardware**, simply because I do not own those devices.
 
-# GARDENA Matter & MQTT Bridge — Home-Assistant-Add-on
+**If you want one of them supported and can lend or send me the hardware, I am happy to test it
+and finish the integration.** Just open an issue and we'll sort it out.
 
-> **Ein-Klick-Installation:** Der linke Button (oben) fügt dieses Add-on-Repository zu Home Assistant hinzu, der
-> rechte springt direkt zur Add-on-Seite. **Aktiv ab der Public-Schaltung** (Go-Live): Die Buttons zeigen auf das
-> öffentliche Repo `wuselAUT/gardena-matter-mqtt-bridge` — solange es privat ist, läuft der Klick noch ins Leere.
+## Why this is plausible
 
-Installiert die **GARDENA Matter & MQTT Bridge** auf dem GARDENA smart Gateway (19005)
-— **ohne SSH, ohne Bauen, ohne Code-Abtippen**. Du trägst nur die **Geräte-ID**
-vom Aufkleber ein (das Login-Passwort sind die ersten 8 Zeichen daraus, das
-Add-on leitet es automatisch ab); das Add-on aktiviert SSH über den offiziellen
-Gateway-Endpunkt, lädt die fertig gebaute Bridge aus einem signierten
-GitHub-Release und deployt sie. Anschließend fügst du das Gateway in Home
-Assistant als **Matter-Gerät** hinzu.
+Husqvarna ships an **official, buildable BSP** and supports custom firmware in practice:
 
-Die Bridge stellt deine GARDENA-Geräte in Home Assistant **auf zwei Wegen** bereit:
-als native **Matter**-Geräte (Bodensensoren + Mäher) und — optional — indem sie
-**alle** Sensorwerte (inkl. Signalstärke, Messintervall, …) per **MQTT** über die
-Home-Assistant-MQTT-Discovery veröffentlicht (additiv, kein Commissioning nötig; Matter bleibt unberührt).
+- Open BSP / U-Boot / Yocto: [`husqvarnagroup/smart-garden-gateway-public`](https://github.com/husqvarnagroup/smart-garden-gateway-public)
+- **A/B boot slots** + official recovery images → low brick risk
+- Official **SSH access over LAN** (no UART, no exploit needed)
 
-> **Status:** Add-on-Gerüst, SSH-/Deploy-Orchestrierung, Commissioning-Anzeige
-> und Status-UI sind gebaut und unit-getestet. **Der Deploy ist jetzt aktiv** —
-> ein Klick auf *Neu deployen* führt den echten Download + SSH-Deploy aus
-> (hash-gepinnt, fail-closed). Der **erste echte Deploy auf ein Gateway sowie das
-> Matter-Commissioning in HA laufen weiterhin gemeinsam mit dem Nutzer als
-> Live-Test**.
+## Hardware (Art. 19005)
 
-## Was es tut
+| Component | Value |
+|---|---|
+| SoC | MediaTek MT7688 (MIPS 24KEc @ 580 MHz) |
+| RAM | 128 MiB |
+| Flash | 8 MiB SPI NOR + 128 MiB SPI NAND |
+| Radio | SiM3U167 (868 MHz, Lemonbeat) — handled by the gateway itself |
 
-1. **SSH am Gateway aktivieren** — über den offiziellen `/ssh_access_*`-Flow
-   (kein Roh-SSH-Hack). Das Add-on erzeugt ein eigenes SSH-Keypair und sendet
-   nur den **Public-Key** an das Gateway.
-2. **Bridge deployen** — die drei Install-Skripte
-   (`install_bridge.sh`, `install_web_ui.sh`, `install_restore.sh`)
-   werden idempotent ausgeführt. Das Bridge-Artefakt kommt aus einem
-   **GitHub-Release** und wird vor dem Deploy per **SHA256-Hash** geprüft
-   (hartes Integritäts-Gate; eine kryptographische Signatur ist ein optionaler
-   Zusatz-Schritt).
-3. **Commissioning anzeigen** — QR-Code und Setup-Code werden in der Add-on-UI
-   gezeigt; du fügst sie in Home Assistant unter
-   *Gerät hinzufügen → Matter* ein.
+The binding constraints are **RAM (128 MiB)** at runtime and the writable **UBI flash**.
 
-## Optionen
+## The approach (Variant A)
 
-| Option | Typ | Bedeutung |
-|---|---|---|
-| `gateway_host` | str | IP/Hostname des Gateways (z. B. `GARDENA-123456` oder `192.168.1.100`) |
-| `device_id` | password (Secret) | Geräte-ID vom Aufkleber auf der Geräteunterseite (z. B. `a1b2c3d4-…`). Das Login-Passwort wird automatisch aus den **ersten 8 Zeichen** abgeleitet; der Wert wird als Secret gespeichert und **nie geloggt**. |
-| `enable_web_ui` | bool | Ingress-Status-UI aktivieren (Default: an) |
-| `disable_ssh_after_deploy` | bool | SSH nach dem Deploy wieder sperren (Key bleibt OTA-fest hinterlegt) |
-| `github_repo` | str | Quelle des Bridge-Release (`owner/name`) |
-| `release_tag` | str | Release-Tag (Default `v0.1.4`, passend zum gepinnten `bridge-release.lock`) |
-| `github_token` | password (Secret) | Optional. Nur nötig, solange das Bridge-Release-Repo **privat** ist: ein GitHub-Token mit Lesezugriff, um das Release-Asset herunterzuladen. Für ein öffentliches Repo leer lassen. Als Secret gespeichert und **nie geloggt**. |
+```
+GARDENA devices ──868 MHz Lemonbeat──▶ lemonbeatd (on the gateway)
+                                           │  reads the LsDL filesystem (inotify)
+                                           ▼
+                              Matter bridge app (C++, MIPS cross-build)
+                                           │
+                                           ▼
+                             Matter fabric (HA / Apple / Google)
+```
 
-## Onboarding (Schritte)
+We deploy into **slot B**; slot A stays as an untouched original fallback.
 
-1. Add-on-Repository in Home Assistant hinzufügen (Repo-URL → *Add-on Store → ⋮ → Repositories*).
-2. **GARDENA Matter & MQTT Bridge** installieren.
-3. In den Add-on-**Optionen** `gateway_host` und `device_id` (Geräte-ID vom
-   Aufkleber) eintragen, speichern. Das Login-Passwort wird automatisch aus den
-   ersten 8 Zeichen der Geräte-ID abgeleitet — kein separates Passwort-Feld.
-4. Add-on **starten** und die **Web-UI** (Ingress, Seitenleiste) öffnen.
-5. Den **Deploy** anstoßen (Re-Deploy-Knopf).
-6. QR-/Setup-Code aus der UI in Home Assistant unter
-   *Einstellungen → Geräte & Dienste → Gerät hinzufügen → Matter* eingeben.
+## License
 
-## Nach der Installation
-
-**Das Add-on ist ein Installer/Updater — kein Laufzeit-Bestandteil.** Nach dem
-abgeschlossenen Deploy läuft die Bridge **eigenständig auf dem Gateway**:
-reboot-fest und OTA-überlebend (über den Restore-Dienst). Matter spricht danach
-**direkt Gateway ↔ Home Assistant** — das Add-on ist **nicht im Datenpfad**.
-
-Das heißt:
-
-- Du darfst dieses Add-on nach einem erfolgreichen Deploy **stoppen oder sogar
-  deinstallieren** — das **Pairing bleibt erhalten** und die GARDENA-Geräte
-  funktionieren in Home Assistant weiter.
-- **Wieder öffnen / anschalten nur**, um die Bridge auf ein neues Release zu
-  aktualisieren, oder um nach einem Factory-Reset des Gateways neu zu deployen.
-- **Pairing-QR / Setup-Code** und der **Matter-An/Aus**-Schalter gibt es auch
-  **direkt auf der Gateway-eigenen Seite** (`/assets/matter.html`), ganz ohne
-  das Add-on.
-
-## Sicherheit
-
-- Das Aufkleber-Passwort ist ein **HA-Secret** und wird **nie geloggt**, nie
-  committet, nie in Fehlermeldungen gespiegelt.
-- Das Add-on läuft in **Home Assistant**, nicht am Gateway — die GARDENA-Cloud
-  wird nicht berührt.
-- Reversibel: Die Bridge wird ins beschreibbare Overlay deployt (kein Flash,
-  kein Slot-Eingriff). Uninstall-Skripte sind vorhanden.
-
-## Kompatibilität & Status
-
-- **Mit Home Assistant getestet** (Matter für Sensoren + Mäher sowie der optionale
-  MQTT-Publisher). Dagegen wird die Bridge entwickelt und verifiziert.
-- **Apple Home und Google Home wurden *nicht* getestet.** Andere Matter-Controller
-  zeigen das Gateway evtl. als *uncertified* / *unbekannten Hersteller* mit
-  eingeschränkter oder keiner Funktion. Wenn du es probierst: als experimentell betrachten.
-- **Hobby-Projekt — keine Gewähr, Nutzung auf eigenes Risiko.** Es läuft im
-  beschreibbaren Overlay des Gateways (kein Flashen, kein Slot-Eingriff) und ist
-  reversibel, aber du bist für deine eigenen Geräte verantwortlich.
+Apache License 2.0 — see [LICENSE](LICENSE).

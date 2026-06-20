@@ -32,10 +32,10 @@ Klicke den Badge unten oder gehe zu **Home Assistant → Einstellungen → Add-o
 Add-on-Shop** → Drei-Punkte-Menü → **Repositories** → URL einfügen:
 
 ```
-https://github.com/wuselAUT/gardena-matter-bridge
+https://github.com/wuselAUT/gardena-matter-mqtt-bridge
 ```
 
-[![Add-on-Repository zu Home Assistant hinzufügen](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-bridge)
+[![Add-on-Repository zu Home Assistant hinzufügen](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FwuselAUT%2Fgardena-matter-mqtt-bridge)
 
 !!! note "Ehrlich: ~3 Schritte, nicht 1"
     Home Assistant kann ein Drittanbieter-Add-on nicht ohne deine Bestätigung installieren.
@@ -146,7 +146,7 @@ Bridge **lokal** — ohne DCL-Lookup. **„Enable test-net DCL usage" kann aus b
 Schritte für Option B:
 
 1. `gardena-paa-cert.pem` vom
-   [aktuellen Release](https://github.com/wuselAUT/gardena-matter-bridge/releases)
+   [aktuellen Release](https://github.com/wuselAUT/gardena-matter-mqtt-bridge/releases)
    herunterladen.
 
 2. In den HA-Matter-Server-Zertifikatsspeicher kopieren. Der Matter-Server liest aus
