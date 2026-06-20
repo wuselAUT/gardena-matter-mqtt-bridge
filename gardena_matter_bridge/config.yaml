@@ -4,7 +4,7 @@
 #
 # Schema-Referenz: https://developers.home-assistant.io/docs/add-ons/configuration/
 name: GARDENA Matter & MQTT Bridge
-version: "0.1.4"
+version: "0.1.5"
 slug: gardena_matter_bridge
 description: >-
   Installiert die GARDENA Matter & MQTT Bridge auf dem GARDENA smart Gateway (19005) -
@@ -45,7 +45,7 @@ options:
   github_repo: "wuselAUT/gardena-matter-mqtt-bridge"
   # standardmaessig greift (Mismatch -> fail-closed). Bei neuem Release: tag hier
   # UND in bridge-release.lock gemeinsam bumpen.
-  release_tag: "v0.1.4"
+  release_tag: "v0.1.5"
   # Repo). Gesetzt = Authorization: Bearer <token> (privates Repo). Secret -> nie
   # loggen, nie committen (Default leer, R12).
   github_token: ""
