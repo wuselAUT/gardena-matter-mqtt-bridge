@@ -76,6 +76,9 @@ but **not yet verified against real hardware**, simply because I do not own thos
 **If you want one of them supported and can lend or send me the hardware, I am happy to test it
 and finish the integration.** Just open an issue and we'll sort it out.
 
+Can't part with the hardware? You can still help: **[Contributing](docs/contributing.md)** explains
+how to report a problem and how to capture a new device's data layer (redacted) so it can be mapped.
+
 ## Why this is plausible
 
 Husqvarna ships an **official, buildable BSP** and supports custom firmware in practice:

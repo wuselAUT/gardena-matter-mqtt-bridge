@@ -78,6 +78,9 @@ nicht besitze.
 **Wenn du eines davon unterstützt haben möchtest und mir die Hardware leihen oder schicken kannst,
 teste ich sie gerne und mache die Integration fertig.** Einfach ein Issue aufmachen, dann klären wir das.
 
+Du willst die Hardware nicht aus der Hand geben? Du kannst trotzdem helfen: **[Mitwirken](docs/contributing.de.md)**
+erklärt, wie du ein Problem meldest und die Datenschicht eines neuen Geräts (geschwärzt) einfängst, damit es gemappt werden kann.
+
 ## Warum das plausibel ist
 
 Husqvarna liefert ein **offizielles, baubares BSP** und unterstützt Custom-Firmware praktisch:
