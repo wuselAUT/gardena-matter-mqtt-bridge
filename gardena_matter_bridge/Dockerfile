@@ -8,6 +8,16 @@ ARG BUILD_FROM=ghcr.io/hassio-addons/base:18.2.0
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
+# BUILD_VERSION wird vom HA-Supervisor beim Image-Build gesetzt (z. B. "0.1.12").
+# ENV macht die Version im laufenden Container verfuegbar → load_addon_version() (Prio 1:
+# ADDON_VERSION-Env) liefert sie direkt; config.yaml-Fallback wird nicht benoetigt.
+# EN: BUILD_VERSION is injected by the HA Supervisor at build time.
+#     ADDON_VERSION env var lets orchestrate.py/load_addon_version() return the real version.
+# DE: BUILD_VERSION wird vom HA-Supervisor beim Build injiziert.
+#     ADDON_VERSION-Env liefert load_addon_version() die echte Version → Footer korrekt.
+ARG BUILD_VERSION
+ENV ADDON_VERSION=${BUILD_VERSION}
+
 # Add-on braucht NUR: openssh-client (ssh/scp fuer Deploy) + python3 (Orchestrator
 # + Ingress-UI). bash/curl/jq bringt die bashio-Base bereits mit -> weggelassen.
 #
@@ -40,6 +50,6 @@ LABEL \
   io.hass.name="GARDENA Matter & MQTT Bridge" \
   io.hass.description="Installiert die GARDENA Matter & MQTT Bridge auf dem Gateway - ohne SSH, ohne Bauen." \
   io.hass.type="addon" \
-  io.hass.version="0.1.0"
+  io.hass.version="${BUILD_VERSION}"
 
 CMD [ "/run.sh" ]

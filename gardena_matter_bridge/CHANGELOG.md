@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.12
+- **Improvement:** The gateway page footer now shows the correct add-on version (e.g. "Add-on v0.1.12 · Bridge v0.1.7"). Previously the add-on version showed as "unknown".
+- **Improvement:** The automatic storage clean-up during deploy is now fully generic — it clears the library directories completely before writing, making every deploy match exactly what was shipped. Unrecognized leftover files of any kind are removed, not just the previously known `"` artefacts.
+
 ## 0.1.11
 - **Fix:** The deploy no longer crashes with "unbound variable" when installing libraries on the gateway. A comment in the deploy script contained an unquoted shell variable that was accidentally expanded by the local shell before being sent to the gateway.
 
@@ -45,6 +49,10 @@
 ---
 
 # Änderungsprotokoll (Deutsch)
+
+## 0.1.12
+- **Verbesserung:** Die Gateway-Seite zeigt im Footer jetzt die korrekte Add-on-Version (z. B. „Add-on v0.1.12 · Bridge v0.1.7"). Bisher erschien dort „unknown".
+- **Verbesserung:** Die automatische Speicher-Aufräumung beim Deploy ist jetzt vollständig generisch — die Bibliotheks-Ordner werden vor dem Schreiben komplett geleert, damit der installierte Stand exakt dem ausgelieferten entspricht. Unbekannte Überreste jeglicher Art werden entfernt, nicht nur die früher bekannten `"`-Artefakte.
 
 ## 0.1.11
 - **Fix:** Der Deploy bricht beim Installieren der Bibliotheken nicht mehr mit „unbound variable" ab. Ein Kommentar im Deploy-Skript enthielt eine unkotierte Shell-Variable, die von der lokalen Shell unbeabsichtigt expandiert wurde, bevor der Befehl an das Gateway gesendet wurde.

@@ -118,29 +118,21 @@ else
 fi
 STOPEOF
 
-# Ziel-Verzeichnis anlegen
-log "Lege ${INSTALL_DIR} an ..."
-ssh ${SSH_OPTS} "${GW}" "mkdir -p ${INSTALL_DIR}/lib ${INSTALL_DIR}/usr/lib"
-
-# BEVOR geschrieben wird (rm braucht keinen Platz → funktioniert auch bei vollem Flash).
-# Stattdessen: find | while read -r f; do rm -f "$f"; done (analog zur funktionierenden .so-Schleife).
+# wird (rm braucht keinen Platz → funktioniert auch bei vollem Flash). Danach legt mkdir -p
+# sie wieder an; Libs werden frisch extrahiert → deployt == ausgeliefert, robust gegen
+# jede kuenftige lib-Akkumulation (nicht nur *"*-Dateien). BusyBox/POSIX-sicher (kein
 # df-Logging vor/nach beweist freigewordenen Platz im Deploy-Log.
-log "Bereinige Müll-Lib-Dateien (*\"*) vor dem Schreiben (BusyBox-sicher) ..."
+log "Generischer lib-Cleanup (rm -rf lib-Dirs vor dem Schreiben, BusyBox-sicher) ..."
 ssh ${SSH_OPTS} "${GW}" << 'CLEANUPEOF'
 echo "df-vorher: $(df -h /usr/local 2>/dev/null | tail -1)"
-_cnt_file=/tmp/_gardena_cleanup_count
-printf '0' > "${_cnt_file}"
-find /usr/local/lib/gardena-matter/usr/lib /usr/local/lib/gardena-matter/lib \
-    -name '*"*' 2>/dev/null | while read -r f; do
-    rm -f "$f"
-    printf '%d' $(( $(cat "${_cnt_file}") + 1 )) > "${_cnt_file}"
-    echo "removed: $f"
-done
-echo "entfernt: $(cat "${_cnt_file}") Dateien"
-rm -f "${_cnt_file}"
+rm -rf "/usr/local/lib/gardena-matter/usr/lib" "/usr/local/lib/gardena-matter/lib"
+echo "Cleanup: lib-Dirs entfernt (deployt == ausgeliefert)"
 echo "df-nachher: $(df -h /usr/local 2>/dev/null | tail -1)"
-echo "Cleanup: ok"
 CLEANUPEOF
+
+# Ziel-Verzeichnis anlegen (nach Cleanup; mkdir -p behandelt leere/fehlende Dirs)
+log "Lege ${INSTALL_DIR} an ..."
+ssh ${SSH_OPTS} "${GW}" "mkdir -p ${INSTALL_DIR}/lib ${INSTALL_DIR}/usr/lib"
 
 # Binary übertragen
 log "Übertrage Binary (scp -O) ..."
