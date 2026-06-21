@@ -122,6 +122,12 @@ STOPEOF
 log "Lege ${INSTALL_DIR} an ..."
 ssh ${SSH_OPTS} "${GW}" "mkdir -p ${INSTALL_DIR}/lib ${INSTALL_DIR}/usr/lib"
 
+# Selbstheilung — akkumulierte Müll-Dateien mit '"' im Namen entfernen,
+# BEVOR geschrieben wird (rm braucht keinen Platz → funktioniert auch bei vollem Flash).
+log "Bereinige Müll-Lib-Dateien (*\"*) vor dem Schreiben ..."
+ssh ${SSH_OPTS} "${GW}" \
+    'find /usr/local/lib/gardena-matter/usr/lib /usr/local/lib/gardena-matter/lib -name '"'"'*"*'"'"' -delete 2>/dev/null; echo "Cleanup: ok"'
+
 # Binary übertragen
 log "Übertrage Binary (scp -O) ..."
 BINARY_SIZE=$(du -sh "${BINARY}" | cut -f1)
@@ -138,8 +144,10 @@ cd ${INSTALL_DIR}
 tar xzf /tmp/matter_libs_install.tar.gz
 rm -f /tmp/matter_libs_install.tar.gz
 # Libs in flaches lib/ und usr/lib/ legen (falls tar eine verschachtelte Struktur entpackt)
+# Quoting-Fix — im unquoted Heredoc passieren literale " unverändert durch.
+# basename "\${so}" (saubere Quotes, KEIN \") → am Gateway: basename "$so" → sauberer Name.
 find ${INSTALL_DIR} -name "*.so*" | while read so; do
-    target="${INSTALL_DIR}/usr/lib/\$(basename \"\${so}\")"
+    target="${INSTALL_DIR}/usr/lib/\$(basename "\${so}")"
     if [ "\${so}" != "\${target}" ]; then
         cp -L "\${so}" "\${target}" 2>/dev/null || true
     fi

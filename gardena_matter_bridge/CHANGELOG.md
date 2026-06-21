@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.8
+- **Fix:** Repeated deploying accumulated unused library files on the gateway (names ending with a stray `"` character), eventually filling the flash and causing the next deploy to fail with "No space left on device". The deploy now automatically cleans up any such leftover files before writing, and no longer creates new ones.
+
 ## 0.1.7
 - **Fix:** The MQTT switch on the gateway page now switches off and on reliably and permanently (survives a reboot). Previously, MQTT could come back on its own after being switched off.
 - **Improvement:** The gateway page footer now shows both the add-on version and the bridge version ("Add-on vX · Bridge vY").
@@ -33,6 +36,9 @@
 ---
 
 # Änderungsprotokoll (Deutsch)
+
+## 0.1.8
+- **Fix:** Wiederholtes Deployen häufte ungenutzte Bibliotheksdateien auf dem Gateway an (Namen mit einem überschüssigen `"`-Zeichen), bis der Flash voll war und der nächste Deploy mit „Kein Speicherplatz mehr" fehlschlug. Der Deploy räumt solche Überreste jetzt automatisch auf, bevor er schreibt, und erzeugt keine neuen fehlerhaften Dateien mehr.
 
 ## 0.1.7
 - **Fix:** Der MQTT-Schalter auf der Gateway-Seite schaltet jetzt zuverlässig dauerhaft aus/ein (bleibt auch nach einem Neustart in dem gesetzten Zustand). Bisher konnte MQTT nach dem Ausschalten von selbst wieder aktiv werden.
