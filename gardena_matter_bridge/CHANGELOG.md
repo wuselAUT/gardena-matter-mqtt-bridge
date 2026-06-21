@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.11
+- **Fix:** The deploy no longer crashes with "unbound variable" when installing libraries on the gateway. A comment in the deploy script contained an unquoted shell variable that was accidentally expanded by the local shell before being sent to the gateway.
+
 ## 0.1.10
 - **Fix:** The automatic storage clean-up during deploy now works reliably on the gateway as well. Previously, the clean-up ran but freed no space (the gateway's minimal shell does not support the `find -delete` flag), causing the subsequent file transfer to fail with "No space left on device". The deploy now removes leftover files using a compatible method and logs the freed space.
 
@@ -42,6 +45,9 @@
 ---
 
 # Änderungsprotokoll (Deutsch)
+
+## 0.1.11
+- **Fix:** Der Deploy bricht beim Installieren der Bibliotheken nicht mehr mit „unbound variable" ab. Ein Kommentar im Deploy-Skript enthielt eine unkotierte Shell-Variable, die von der lokalen Shell unbeabsichtigt expandiert wurde, bevor der Befehl an das Gateway gesendet wurde.
 
 ## 0.1.10
 - **Fix:** Die automatische Speicher-Aufräumung beim Deploy funktioniert jetzt auch auf dem Gateway zuverlässig. Bisher lief die Aufräumung durch, gab aber keinen Speicher frei (die minimale Shell des Gateways unterstützt den `find -delete`-Flag nicht), sodass die anschließende Dateiübertragung mit „Kein Speicherplatz mehr" scheiterte. Der Deploy entfernt Überreste jetzt mit einer kompatiblen Methode und protokolliert den freigewordenen Platz.

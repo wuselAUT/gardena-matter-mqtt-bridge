@@ -4,7 +4,7 @@
 #
 # Schema-Referenz: https://developers.home-assistant.io/docs/add-ons/configuration/
 name: GARDENA Matter & MQTT Bridge
-version: "0.1.10"
+version: "0.1.11"
 slug: gardena_matter_bridge
 description: >-
   Installiert die GARDENA Matter & MQTT Bridge auf dem GARDENA smart Gateway (19005) -

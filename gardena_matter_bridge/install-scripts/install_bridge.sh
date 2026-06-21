@@ -158,8 +158,8 @@ cd ${INSTALL_DIR}
 tar xzf /tmp/matter_libs_install.tar.gz
 rm -f /tmp/matter_libs_install.tar.gz
 # Libs in flaches lib/ und usr/lib/ legen (falls tar eine verschachtelte Struktur entpackt)
-# Quoting-Fix — im unquoted Heredoc passieren literale " unverändert durch.
-# basename "\${so}" (saubere Quotes, KEIN \") → am Gateway: basename "$so" → sauberer Name.
+# Quoting-Fix — im unquoted Heredoc passieren literale " unveraendert durch.
+# basename mit escaped Remote-Var: \$(basename "\${so}") ergibt on-device saubere Bibliotheksnamen.
 find ${INSTALL_DIR} -name "*.so*" | while read so; do
     target="${INSTALL_DIR}/usr/lib/\$(basename "\${so}")"
     if [ "\${so}" != "\${target}" ]; then
