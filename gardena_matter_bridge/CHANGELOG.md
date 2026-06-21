@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.10
+- **Fix:** The automatic storage clean-up during deploy now works reliably on the gateway as well. Previously, the clean-up ran but freed no space (the gateway's minimal shell does not support the `find -delete` flag), causing the subsequent file transfer to fail with "No space left on device". The deploy now removes leftover files using a compatible method and logs the freed space.
+
 ## 0.1.9
 - **Fix:** Re-deploying failed when the gateway storage was full — the add-on now checks first whether a secure connection is already available and, if so, skips the redundant connection setup that would have failed. The deploy then runs normally and cleans up the storage itself.
 
@@ -39,6 +42,9 @@
 ---
 
 # Änderungsprotokoll (Deutsch)
+
+## 0.1.10
+- **Fix:** Die automatische Speicher-Aufräumung beim Deploy funktioniert jetzt auch auf dem Gateway zuverlässig. Bisher lief die Aufräumung durch, gab aber keinen Speicher frei (die minimale Shell des Gateways unterstützt den `find -delete`-Flag nicht), sodass die anschließende Dateiübertragung mit „Kein Speicherplatz mehr" scheiterte. Der Deploy entfernt Überreste jetzt mit einer kompatiblen Methode und protokolliert den freigewordenen Platz.
 
 ## 0.1.9
 - **Fix:** Ein erneuter Deploy schlug fehl, wenn der Gateway-Speicher voll war — das Add-on prüft jetzt zuerst, ob bereits eine sichere Verbindung besteht, und überspringt in diesem Fall das redundante Verbindungs-Setup, das sonst fehlgeschlagen wäre. Der Deploy läuft danach normal durch und räumt den Speicher selbst auf.

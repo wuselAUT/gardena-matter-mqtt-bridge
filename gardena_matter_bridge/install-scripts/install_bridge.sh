@@ -122,11 +122,25 @@ STOPEOF
 log "Lege ${INSTALL_DIR} an ..."
 ssh ${SSH_OPTS} "${GW}" "mkdir -p ${INSTALL_DIR}/lib ${INSTALL_DIR}/usr/lib"
 
-# Selbstheilung — akkumulierte Müll-Dateien mit '"' im Namen entfernen,
 # BEVOR geschrieben wird (rm braucht keinen Platz → funktioniert auch bei vollem Flash).
-log "Bereinige Müll-Lib-Dateien (*\"*) vor dem Schreiben ..."
-ssh ${SSH_OPTS} "${GW}" \
-    'find /usr/local/lib/gardena-matter/usr/lib /usr/local/lib/gardena-matter/lib -name '"'"'*"*'"'"' -delete 2>/dev/null; echo "Cleanup: ok"'
+# Stattdessen: find | while read -r f; do rm -f "$f"; done (analog zur funktionierenden .so-Schleife).
+# df-Logging vor/nach beweist freigewordenen Platz im Deploy-Log.
+log "Bereinige Müll-Lib-Dateien (*\"*) vor dem Schreiben (BusyBox-sicher) ..."
+ssh ${SSH_OPTS} "${GW}" << 'CLEANUPEOF'
+echo "df-vorher: $(df -h /usr/local 2>/dev/null | tail -1)"
+_cnt_file=/tmp/_gardena_cleanup_count
+printf '0' > "${_cnt_file}"
+find /usr/local/lib/gardena-matter/usr/lib /usr/local/lib/gardena-matter/lib \
+    -name '*"*' 2>/dev/null | while read -r f; do
+    rm -f "$f"
+    printf '%d' $(( $(cat "${_cnt_file}") + 1 )) > "${_cnt_file}"
+    echo "removed: $f"
+done
+echo "entfernt: $(cat "${_cnt_file}") Dateien"
+rm -f "${_cnt_file}"
+echo "df-nachher: $(df -h /usr/local 2>/dev/null | tail -1)"
+echo "Cleanup: ok"
+CLEANUPEOF
 
 # Binary übertragen
 log "Übertrage Binary (scp -O) ..."
