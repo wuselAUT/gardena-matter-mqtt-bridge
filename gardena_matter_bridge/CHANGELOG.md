@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.13
+- **Fix:** The add-on version in the gateway page footer is now shown reliably regardless of how the add-on image was built (previously showed "unknown" when the add-on was installed directly from the repository rather than from the official image store).
+
 ## 0.1.12
 - **Improvement:** The gateway page footer now shows the correct add-on version (e.g. "Add-on v0.1.12 · Bridge v0.1.7"). Previously the add-on version showed as "unknown".
 - **Improvement:** The automatic storage clean-up during deploy is now fully generic — it clears the library directories completely before writing, making every deploy match exactly what was shipped. Unrecognized leftover files of any kind are removed, not just the previously known `"` artefacts.
@@ -49,6 +52,9 @@
 ---
 
 # Änderungsprotokoll (Deutsch)
+
+## 0.1.13
+- **Fix:** Die Add-on-Version im Footer der Gateway-Seite wird jetzt zuverlässig angezeigt, unabhängig davon, wie das Add-on-Image gebaut wurde (bisher erschien dort teilweise „unknown", wenn das Add-on direkt aus dem Repository statt aus dem offiziellen Image-Store installiert wurde).
 
 ## 0.1.12
 - **Verbesserung:** Die Gateway-Seite zeigt im Footer jetzt die korrekte Add-on-Version (z. B. „Add-on v0.1.12 · Bridge v0.1.7"). Bisher erschien dort „unknown".

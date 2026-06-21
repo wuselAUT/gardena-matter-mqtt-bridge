@@ -8,15 +8,14 @@ ARG BUILD_FROM=ghcr.io/hassio-addons/base:18.2.0
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
-# BUILD_VERSION wird vom HA-Supervisor beim Image-Build gesetzt (z. B. "0.1.12").
-# ENV macht die Version im laufenden Container verfuegbar → load_addon_version() (Prio 1:
-# ADDON_VERSION-Env) liefert sie direkt; config.yaml-Fallback wird nicht benoetigt.
-# EN: BUILD_VERSION is injected by the HA Supervisor at build time.
-#     ADDON_VERSION env var lets orchestrate.py/load_addon_version() return the real version.
-# DE: BUILD_VERSION wird vom HA-Supervisor beim Build injiziert.
-#     ADDON_VERSION-Env liefert load_addon_version() die echte Version → Footer korrekt.
+# BUILD_VERSION wird vom offiziellen Image-Builder (GitHub home-assistant/builder) gesetzt,
+# Deshalb wird ADDON_VERSION nicht mehr per ENV aus BUILD_VERSION gesetzt (leere Env-Var
+# bei lokalem Build wuerde load_addon_version() mit leerem Wert beenden, kein Fallback).
+# Die Version wird zur Laufzeit aus zwei build-unabhaengigen Quellen ermittelt:
+#   1. run.sh fragt http://supervisor/addons/self/info (SUPERVISOR_TOKEN) ab.
+#   2. Fallback: load_addon_version() liest /opt/gardena/config.yaml (COPY unten).
+# ARG BUILD_VERSION + LABEL duerfen bleiben (fuer offizielle Builds korrekt).
 ARG BUILD_VERSION
-ENV ADDON_VERSION=${BUILD_VERSION}
 
 # Add-on braucht NUR: openssh-client (ssh/scp fuer Deploy) + python3 (Orchestrator
 # + Ingress-UI). bash/curl/jq bringt die bashio-Base bereits mit -> weggelassen.
@@ -43,6 +42,9 @@ COPY install-scripts/ /opt/gardena/install-scripts/
 # /opt/gardena/bridge-release.lock (RELEASE_LOCK_PATH neben dem Modul). MUSS ins
 # Image — sonst fail-closed "bridge-release.lock nicht lesbar".
 COPY bridge-release.lock /opt/gardena/bridge-release.lock
+# liest os.path.dirname(__file__)/config.yaml = /opt/gardena/config.yaml, falls
+# ADDON_VERSION-Env (Supervisor-API via run.sh) nicht gesetzt ist.
+COPY config.yaml /opt/gardena/config.yaml
 RUN chmod a+x /run.sh
 
 # Add-on-Metadaten (HA liest Labels)

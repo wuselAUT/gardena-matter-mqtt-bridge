@@ -88,6 +88,21 @@ else
     log "Add-on-Keypair vorhanden (wiederverwendet, OTA-fest hinterlegt)."
 fi
 
+# Fragt http://supervisor/addons/self/info ab; SUPERVISOR_TOKEN ist vom HA-Framework
+# im Container gesetzt. Fehlertolerant: bei Netzwerkfehler oder leerem Ergebnis
+# bleibt ADDON_VERSION ungesetzt -> load_addon_version() greift auf config.yaml-Fallback.
+# SUPERVISOR_TOKEN wird NIEMALS geloggt (R12).
+_api_version="$(curl -sSL \
+    -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+    http://supervisor/addons/self/info 2>/dev/null \
+    | jq -r '.data.version // empty' 2>/dev/null || true)"
+if [ -n "${_api_version}" ]; then
+    export ADDON_VERSION="${_api_version}"
+    log "  ADDON_VERSION=${ADDON_VERSION} (Supervisor-API)"
+else
+    log "  ADDON_VERSION: Supervisor-API nicht erreichbar; config.yaml-Fallback greift."
+fi
+
 # ── Ingress-Status-UI starten () ───────────────────────────────────────
 # Die UI ruft orchestrate.py fuer Deploy/Status auf. Sie laeuft im Vordergrund
 # (Add-on-Hauptprozess). Onboarding/Deploy wird ueber die UI ausgeloest.
