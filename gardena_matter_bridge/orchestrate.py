@@ -836,6 +836,35 @@ def load_addon_version() -> str:
     return ""
 
 
+def ssh_reachable(
+    ssh_runner: Callable[[Sequence[str]], int],
+    host: str,
+    private_key_path: str,
+) -> bool:
+    """Prueft ob SSH am Gateway bereits erreichbar ist (trivialer Testbefehl).
+
+    Liefert True wenn rc==0, False bei jedem anderen Return-Code oder Exception.
+    Wird in run_full_deploy VOR dem Key-Schreiben aufgerufen:
+    Bei erreichbarer SSH sind install_public_key + set_ssh_enabled redundant und
+    werden uebersprungen — relevant wenn Gateway-Flash voll ist und das Schreiben
+    scheitern wuerde (HTTP 500), die SSH-Verbindung selbst aber noch funktioniert.
+    """
+    try:
+        cmd = [
+            "ssh",
+            "-o", "StrictHostKeyChecking=no",
+            "-o", "BatchMode=yes",
+            "-o", "ConnectTimeout=5",
+            "-i", private_key_path,
+            f"root@{host}",
+            "true",
+        ]
+        rc = ssh_runner(cmd)
+        return rc == 0
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def run_full_deploy(
     plan: DeployPlan,
     *,
@@ -853,8 +882,15 @@ def run_full_deploy(
 ) -> DeployResult:
     """Fuehrt den kompletten Flow in der vorgegebenen Reihenfolge aus.
 
-    login -> install_credentials -> enable -> (release verify) -> deploy
-          -> optional disable.
+    Normalfall: login -> install_credentials -> enable -> (release verify) -> deploy
+                -> optional disable.
+
+    SSH-Probe: VOR dem Key-Schreiben wird SSH am Gateway getestet.
+    Ist SSH bereits erreichbar (rc==0), werden install_public_key + set_ssh_enabled
+    uebersprungen (Schritt 'ssh_already_available') und direkt mit release/deploy
+    fortgefahren. Ist SSH NICHT erreichbar, laeuft der bisherige Pfad unveraendert
+    (login -> install_credentials -> enable); deren Fehler bleiben hart (kein
+    Maskieren der Erst-Installation).
 
     WICHTIG: Das Release wird VOR der eigentlichen Deploy-Ausfuehrung gezogen +
     verifiziert; aber NACH der SSH-Freigabe ist egal — die Reihenfolge
@@ -883,15 +919,29 @@ def run_full_deploy(
 
     result = DeployResult()
 
-    gateway.login(login_password)
-    result.steps.append("login")
+    # SSH-Probe VOR dem Key-Schreiben.
+    # Ist SSH schon erreichbar (letzter Deploy hat Key + Enable hinterlassen,
+    # disable_ssh_after_deploy=false), koennen install_public_key + set_ssh_enabled
+    # uebersprungen werden — sie wuerden bei vollem Gateway-Flash mit HTTP 500
+    # scheitern und den Deploy abbrechen, BEVOR install_bridge.sh (Selbstheilung)
+    # je laeuft (Henne-Ei). Login dient nur dem Config-Interface fuer die
+    # SSH-Setup-Endpunkte -> wird im Skip-Fall ebenfalls uebersprungen.
+    if ssh_reachable(ssh_runner, plan.gateway_host, plan.private_key_path):
+        # SSH bereits aktiv + Key bereits installiert: Setup ueberspringen.
+        result.steps.append("ssh_already_available")
+    else:
+        # SSH nicht erreichbar: normaler Pfad — Erst-Installation oder neues Setup.
+        # Fehler von login/install_public_key/set_ssh_enabled bleiben HART
+        # (kein Maskieren eines echten Setup-Fehlers).
+        gateway.login(login_password)
+        result.steps.append("login")
 
-    public_key = read_public_key(plan.public_key_path)
-    gateway.install_public_key(public_key)
-    result.steps.append("install_credentials")
+        public_key = read_public_key(plan.public_key_path)
+        gateway.install_public_key(public_key)
+        result.steps.append("install_credentials")
 
-    gateway.set_ssh_enabled(True)
-    result.steps.append("enable_ssh")
+        gateway.set_ssh_enabled(True)
+        result.steps.append("enable_ssh")
 
     artifact = fetch_and_verify_release(
         downloader,

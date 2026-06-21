@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.9
+- **Fix:** Re-deploying failed when the gateway storage was full — the add-on now checks first whether a secure connection is already available and, if so, skips the redundant connection setup that would have failed. The deploy then runs normally and cleans up the storage itself.
+
 ## 0.1.8
 - **Fix:** Repeated deploying accumulated unused library files on the gateway (names ending with a stray `"` character), eventually filling the flash and causing the next deploy to fail with "No space left on device". The deploy now automatically cleans up any such leftover files before writing, and no longer creates new ones.
 
@@ -36,6 +39,9 @@
 ---
 
 # Änderungsprotokoll (Deutsch)
+
+## 0.1.9
+- **Fix:** Ein erneuter Deploy schlug fehl, wenn der Gateway-Speicher voll war — das Add-on prüft jetzt zuerst, ob bereits eine sichere Verbindung besteht, und überspringt in diesem Fall das redundante Verbindungs-Setup, das sonst fehlgeschlagen wäre. Der Deploy läuft danach normal durch und räumt den Speicher selbst auf.
 
 ## 0.1.8
 - **Fix:** Wiederholtes Deployen häufte ungenutzte Bibliotheksdateien auf dem Gateway an (Namen mit einem überschüssigen `"`-Zeichen), bis der Flash voll war und der nächste Deploy mit „Kein Speicherplatz mehr" fehlschlug. Der Deploy räumt solche Überreste jetzt automatisch auf, bevor er schreibt, und erzeugt keine neuen fehlerhaften Dateien mehr.
