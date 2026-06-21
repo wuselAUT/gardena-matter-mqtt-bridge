@@ -333,9 +333,12 @@ def resolve_expected_sha256(lock: ReleaseLock, configured_tag: str) -> str:
     Regeln (KEIN stiller Skip):
       - lock.sha256 ist ein klar markierter Platzhalter -> fail-closed (das echte
         Release ist noch nicht gepinnt; Deploy bricht ab).
-      - configured_tag != lock.tag -> klare Warnung + fail-closed (es liegt kein
-        Pin fuer das angeforderte Release vor).
-      - sonst: lock.sha256 als harten Pin zurueckgeben.
+      - configured_tag ist LEER ("") -> der Lock-Tag wird automatisch verwendet
+        (kein manuelles Nachziehen nach einem Add-on-Update noetig). Der Nutzer
+        muss release_tag nicht mehr anpassen — leer = immer die gepinnte Version.
+      - configured_tag ist EXPLIZIT gesetzt und != lock.tag -> weiterhin fail-closed
+        (Pin-Schutz bleibt: ein falscher expliziter Tag bricht den Deploy ab).
+      - sonst (configured_tag == lock.tag): lock.sha256 als harten Pin zurueckgeben.
     """
     if PLACEHOLDER_SHA256_MARKER in lock.sha256:
         raise OrchestrationError(
@@ -343,12 +346,19 @@ def resolve_expected_sha256(lock: ReleaseLock, configured_tag: str) -> str:
             "Bridge-Release ist noch nicht gepinnt. Deploy abgebrochen (fail-closed). "
             "Maintainer: build-bridge-release.sh laufen lassen + den SHA256 im Lock setzen."
         )
-    if (configured_tag or "").strip() != lock.tag:
+    # Leerer Tag -> automatisch Lock-Tag verwenden (keine Reibung nach Add-on-Update).
+    effective_tag = (configured_tag or "").strip()
+    if not effective_tag:
+        # Leer = gepinnte Version aus dem Lock nehmen (kein Abbruch).
+        return lock.sha256
+    # Explizit gesetzter Tag muss zum Lock passen (fail-closed bleibt erhalten).
+    if effective_tag != lock.tag:
         raise OrchestrationError(
             f"Konfigurierter release_tag '{configured_tag}' != gepinntem Lock-Tag "
             f"'{lock.tag}' — fuer dieses Release liegt KEIN Hash-Pin vor. Deploy "
-            "abgebrochen (fail-closed, kein stiller Skip). Entweder release_tag auf "
-            f"'{lock.tag}' setzen oder das Lock fuer den gewuenschten Tag aktualisieren."
+            "abgebrochen (fail-closed, kein stiller Skip). Entweder release_tag leeren "
+            "(= nutzt die gepinnte Version automatisch) oder release_tag auf "
+            f"'{lock.tag}' setzen."
         )
     return lock.sha256
 

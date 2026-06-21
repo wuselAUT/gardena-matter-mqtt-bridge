@@ -19,7 +19,7 @@ configuration:
     description: "GitHub repository (owner/name) that provides the signed Bridge release to deploy."
   release_tag:
     name: "Release tag"
-    description: "Which Bridge release to deploy — ‚latest' or a specific version tag."
+    description: "Which Bridge release to deploy. Leave empty to use the pinned version automatically (recommended). Set to a specific version tag only if you want to pin a different release — must match the lock exactly, otherwise the deploy will be aborted."
   github_token:
     name: "GitHub token (private repo)"
     description: "Optional. Only needed while the Bridge release repository is private: a GitHub token with read access to download the release asset. Leave empty for a public repository. The token is stored as a secret and never logged."

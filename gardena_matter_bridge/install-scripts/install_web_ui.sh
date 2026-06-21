@@ -86,6 +86,15 @@ ssh ${SSH_OPTS} "${GW}" 'echo "SSH OK; hostname=$(hostname)"' \
 # ── Alte Web-UI-Reste deaktivieren (falls aktiv) ──────────────────────
 log "=== Alte Dienste deaktivieren (falls aktiv) ==="
 ssh ${SSH_OPTS} "${GW}" << 'CLEANUP_EOF'
+# Toggle-Daemon stoppen BEVOR der Binary ueberschrieben wird (ETXTBSY-Fix).
+# Reihenfolge: zuerst Socket entwaffnen (verhindert Neuaktivierung), dann
+# persistenten Daemon beenden (gibt /etc/gardena-matter/gardena-toggle frei).
+for u in gardena-matter-toggle.socket gardena-matter-toggle.service; do
+    if systemctl is-active --quiet "$u" 2>/dev/null; then
+        systemctl stop "$u" && echo "Stopped: $u"
+    fi
+done
+# Legacy-Units (alte Web-UI, falls noch vorhanden) ebenfalls deaktivieren.
 for u in gardena-matter-web.socket gardena-matter-web.service; do
     if systemctl is-active --quiet "$u" 2>/dev/null; then
         systemctl stop "$u" && echo "Stopped: $u"
@@ -163,8 +172,14 @@ trap 'rm -f "${MATTER_HTML_TMP}"' EXIT
 
 # ── Dateien permanent in /etc/gardena-matter/ ablegen (OTA-Restore-Quelle) ──
 log "=== Persistente Ablage in ${INSTALL_DIR}/ ==="
+# gardena-toggle: atomar via .new + mv (haertend gegen Rest-ETXTBSY).
+# Der Toggle-Daemon wurde oben bereits gestoppt; mv ist dennoch atomarer als
+# direktes scp, falls auf dem Gateway unerwartete Prozesse das Binary noch halten.
 scp -O ${SSH_OPTS} \
     "${WEB_UI_SRC}/gardena-toggle" \
+    "${GW}:${INSTALL_DIR}/gardena-toggle.new"
+ssh ${SSH_OPTS} "${GW}" "mv -f ${INSTALL_DIR}/gardena-toggle.new ${INSTALL_DIR}/gardena-toggle && chmod +x ${INSTALL_DIR}/gardena-toggle"
+scp -O ${SSH_OPTS} \
     "${WEB_UI_SRC}/update-matter-status.sh" \
     "${WEB_UI_SRC}/qrcode.min.js" \
     "${GW}:${INSTALL_DIR}/"
@@ -172,7 +187,6 @@ scp -O ${SSH_OPTS} \
 scp -O ${SSH_OPTS} "${MATTER_HTML_TMP}" "${GW}:${INSTALL_DIR}/matter.html"
 
 ssh ${SSH_OPTS} "${GW}" "
-    chmod +x ${INSTALL_DIR}/gardena-toggle
     chmod +x ${INSTALL_DIR}/update-matter-status.sh
     chmod 644 ${INSTALL_DIR}/matter.html
     chmod 644 ${INSTALL_DIR}/qrcode.min.js

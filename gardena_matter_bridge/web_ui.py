@@ -75,22 +75,30 @@ def _read_env_config() -> dict:
 def build_deploy_plan(cfg: dict, *, read_text=None) -> "orch.DeployPlan":
     """Baut den DeployPlan und verdrahtet das HARTE Hash-Gate.
 
-    expected_sha256 = resolve_expected_sha256(load_release_lock(...), release_tag)
+    expected_sha256 = resolve_expected_sha256(load_release_lock(...), effective_tag)
     -> Platzhalter ODER Tag-Mismatch fuehren hier (vor jedem Gateway-/Deploy-
     Aufruf) zu einem fail-closed OrchestrationError. `read_text` ist injizierbar
     (Tests); produktiv liest load_release_lock die Lock-Datei.
+
+    effective_tag: Ist cfg["release_tag"] leer/nur-Leerzeichen, wird automatisch
+    lock.tag verwendet (keine Reibung nach Add-on-Updates). Ein EXPLIZIT gesetzter,
+    zum Lock nicht passender Tag bricht weiterhin hart ab (fail-closed, Pin-Schutz
+    bleibt erhalten). Denselben effective_tag nutzen sowohl der SHA-Pin-Resolve als
+    auch DeployPlan.tag -> Download-Tag und Pin-Pfad sind immer konsistent.
     """
     if read_text is None:
         lock = orch.load_release_lock(orch._default_read_text)
     else:
         lock = orch.load_release_lock(read_text)
-    expected = orch.resolve_expected_sha256(lock, cfg["release_tag"])
+    # Effektiven Tag bestimmen: leer/whitespace -> Lock-Tag verwenden.
+    effective_tag = (cfg["release_tag"] or "").strip() or lock.tag
+    expected = orch.resolve_expected_sha256(lock, effective_tag)
     return orch.DeployPlan(
         gateway_host=cfg["gateway_host"],
         private_key_path=cfg["priv_key"],
         public_key_path=cfg["pub_key"],
         repo=cfg["github_repo"],
-        tag=cfg["release_tag"],
+        tag=effective_tag,
         expected_sha256=expected,
         disable_ssh_after=cfg["disable_ssh_after"],
     )
