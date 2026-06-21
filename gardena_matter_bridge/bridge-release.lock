@@ -1,6 +1,6 @@
 {
-  "_comment": "v0.1.5: MQTT-Einstellungen auf der Gateway-Seite speichern wieder moeglich (frischer Toggle), Versionsanzeige im Footer korrigiert. Bei neuem Release: tag + sha256 hier per build-bridge-release.sh-Ausgabe aktualisieren.",
+  "_comment": "v0.1.7: MQTT-Toggle dauerhaft (disable+stop / enable+start); Status authoritativ via systemctl is-active; Footer zeigt Add-on- und Bridge-Version. Bei neuem Release: tag + sha256 per build-bridge-release.sh-Ausgabe aktualisieren.",
   "repo": "wuselAUT/gardena-matter-mqtt-bridge",
-  "tag": "v0.1.5",
-  "sha256": "851ee9009fc9b194e6305dc7a59d328f33cd98ee9bd2d9ac892bfbe2dacd2f9c"
+  "tag": "v0.1.7",
+  "sha256": "bb36a5e3bb07703e0523abef3ff8b219246adccda3c700619afd373682752cf2"
 }

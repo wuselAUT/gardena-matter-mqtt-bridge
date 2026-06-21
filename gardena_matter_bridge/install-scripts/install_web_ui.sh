@@ -165,9 +165,27 @@ fi
 
 log "  BUILD_VERSION final = ${BUILD_VERSION}"
 
-# Temporaere Kopie mit ersetztem Platzhalter erzeugen (Original bleibt unveraendert)
+# ADDON_VERSION: von orchestrate.py als Env-Variable gesetzt (aus config.yaml / ADDON_VERSION-Env).
+# Fallback: leer -> "__ADDON_VERSION__" bleibt als sichtbarer Hinweis (kein stiller Verlust).
+# Suchpfade:
+#   1. Env ADDON_VERSION (vom Add-on-Container gesetzt)
+#   2. "unknown" als Fallback-String (sicherer als leerer String)
+#
+# EN: ADDON_VERSION is injected by orchestrate.py as an environment variable.
+#     Fallback "unknown" keeps the footer readable even without the env var.
+# DE: ADDON_VERSION wird von orchestrate.py als Umgebungsvariable gesetzt.
+#     Fallback "unknown" haelt den Footer lesbar auch ohne die Env-Variable.
+log "=== Add-on-Version einsetzen ==="
+ADDON_VERSION="${ADDON_VERSION:-unknown}"
+log "  ADDON_VERSION = ${ADDON_VERSION}"
+
+# Temporaere Kopie mit BEIDEN ersetzten Platzhaltern erzeugen (Original bleibt unveraendert).
+# Reihenfolge: zuerst __ADDON_VERSION__, dann __BUILD_VERSION__ (unabhaengig, keine Konflikte).
 MATTER_HTML_TMP="/tmp/matter_$$.html"
-sed "s/__BUILD_VERSION__/${BUILD_VERSION}/g" "${WEB_UI_SRC}/matter.html" > "${MATTER_HTML_TMP}"
+sed \
+    -e "s/__ADDON_VERSION__/${ADDON_VERSION}/g" \
+    -e "s/__BUILD_VERSION__/${BUILD_VERSION}/g" \
+    "${WEB_UI_SRC}/matter.html" > "${MATTER_HTML_TMP}"
 trap 'rm -f "${MATTER_HTML_TMP}"' EXIT
 
 # ── Dateien permanent in /etc/gardena-matter/ ablegen (OTA-Restore-Quelle) ──

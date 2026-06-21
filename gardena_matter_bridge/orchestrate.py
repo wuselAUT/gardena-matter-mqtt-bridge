@@ -562,6 +562,7 @@ def build_install_script_command(
     binary_path: str,
     libs_tgz_path: str,
     web_ui_dir: str = "",
+    addon_version: str = "",
 ) -> List[str]:
     """Baut die Kommandozeile, die EIN Install-Skript CONTAINER-LOKAL ausfuehrt.
 
@@ -575,6 +576,14 @@ def build_install_script_command(
     install_web_ui.sh + install_restore.sh erhalten zusaetzlich
       WEB_UI_SRC=<web_ui_dir>  (entpacktes web-ui/-Unterverzeichnis im Bundle)
     install_bridge.sh erhaelt WEB_UI_SRC NICHT (hat keine web-ui-Abhaengigkeit).
+
+    install_web_ui.sh erhaelt ADDON_VERSION fuer den Footer-Platzhalter.
+    Leer = Fallback "unknown" im install_web_ui.sh-Skript.
+
+    EN: install_web_ui.sh receives ADDON_VERSION for the footer placeholder.
+        Empty = fallback "unknown" in the script.
+    DE: install_web_ui.sh erhaelt ADDON_VERSION fuer den Footer-Platzhalter.
+        Leer = Fallback "unknown" im Skript.
     """
     env = [
         "env",
@@ -587,6 +596,9 @@ def build_install_script_command(
     # WEB_UI_SRC nur fuer Skripte 2+3, NICHT fuer install_bridge.sh.
     if script in _SCRIPTS_NEEDING_WEB_UI_SRC and web_ui_dir:
         env.append(f"WEB_UI_SRC={web_ui_dir}")
+    # ADDON_VERSION nur fuer install_web_ui.sh (hat den __ADDON_VERSION__-Platzhalter).
+    if script == "install_web_ui.sh" and addon_version:
+        env.append(f"ADDON_VERSION={addon_version}")
     env += ["bash", os.path.join(scripts_dir, script)]
     return env
 
@@ -601,6 +613,7 @@ def deploy_via_ssh(
     web_ui_dir: str = "",
     scripts: Sequence[str] = INSTALL_SCRIPTS,
     scripts_dir: str = INSTALL_SCRIPTS_DIR,
+    addon_version: str = "",
 ) -> List[str]:
     """Idempotenter Deploy — fuehrt die Install-Skripte CONTAINER-LOKAL aus.
 
@@ -612,6 +625,10 @@ def deploy_via_ssh(
 
     Die Install-Skripte sind on-device-idempotent (siehe matter/install_*.sh):
     KVS bleibt, systemctl enable wiederholbar, Firewall -C vor -I.
+
+    addon_version wird als ADDON_VERSION an install_web_ui.sh weitergegeben.
+    EN: addon_version is passed as ADDON_VERSION to install_web_ui.sh.
+    DE: addon_version wird als ADDON_VERSION an install_web_ui.sh weitergegeben.
     """
     executed: List[str] = []
     for script in scripts:
@@ -623,6 +640,7 @@ def deploy_via_ssh(
             binary_path=binary_path,
             libs_tgz_path=libs_tgz_path,
             web_ui_dir=web_ui_dir,
+            addon_version=addon_version,
         )
         rc = runner(cmd)
         if rc != 0:
@@ -787,6 +805,37 @@ class DeployResult:
     mqtt_deployed: bool = False
 
 
+def load_addon_version() -> str:
+    """Liest die Add-on-Version aus der Umgebungsvariable ADDON_VERSION oder config.yaml.
+
+    Die Add-on-Version wird fuer den Footer-Platzhalter __ADDON_VERSION__
+    benoetigt. Das HA-Add-on-Framework setzt ADDON_VERSION als Env-Variable; als
+    Fallback wird config.yaml neben diesem Modul gelesen.
+
+    EN: Reads the add-on version from ADDON_VERSION env var or config.yaml.
+        Returns empty string if neither is available.
+    DE: Liest die Add-on-Version aus der Env-Variable ADDON_VERSION oder config.yaml.
+        Gibt leeren String zurueck wenn keiner verfuegbar ist.
+    """
+    # 1. Umgebungsvariable (gesetzt vom HA-Add-on-Framework oder run.sh)
+    version = os.environ.get("ADDON_VERSION", "").strip()
+    if version:
+        return version
+    # 2. config.yaml neben diesem Modul
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
+    try:
+        with open(config_path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if line.startswith("version:"):
+                    val = line[len("version:"):].strip().strip('"').strip("'")
+                    if val:
+                        return val
+    except Exception:  # noqa: BLE001
+        pass
+    return ""
+
+
 def run_full_deploy(
     plan: DeployPlan,
     *,
@@ -800,6 +849,7 @@ def run_full_deploy(
     unpack_dir: str = "/data/release",
     extractor: Optional[Callable[[str, str], None]] = None,
     read_text: Optional[Callable[[str], str]] = None,
+    addon_version: str = "",
 ) -> DeployResult:
     """Fuehrt den kompletten Flow in der vorgegebenen Reihenfolge aus.
 
@@ -867,6 +917,10 @@ def run_full_deploy(
     result.bundle_version = bundle.version
     result.steps.append("bundle_unpacked")
 
+    # Add-on-Version fuer Footer-Platzhalter __ADDON_VERSION__.
+    # Bevorzugt: uebergebener addon_version-Parameter; Fallback: load_addon_version().
+    effective_addon_version = addon_version or load_addon_version()
+
     result.executed_scripts = deploy_via_ssh(
         ssh_runner,
         host=plan.gateway_host,
@@ -875,6 +929,7 @@ def run_full_deploy(
         libs_tgz_path=bundle.libs_tgz_path,
         web_ui_dir=bundle.web_ui_dir,
         scripts=plan.scripts,
+        addon_version=effective_addon_version,
     )
     result.steps.append("deploy")
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7
+- **Fix:** The MQTT switch on the gateway page now switches off and on reliably and permanently (survives a reboot). Previously, MQTT could come back on its own after being switched off.
+- **Improvement:** The gateway page footer now shows both the add-on version and the bridge version ("Add-on vX · Bridge vY").
+
 ## 0.1.6
 - **Fix:** Re-deploying or updating the bridge failed with "Text file busy" — the toggle service is now properly stopped before the binary is replaced and restarted afterwards.
 - **Improvement:** Leaving the "Release tag" option empty now automatically uses the pinned version — no manual update needed after an add-on upgrade.
@@ -29,6 +33,10 @@
 ---
 
 # Änderungsprotokoll (Deutsch)
+
+## 0.1.7
+- **Fix:** Der MQTT-Schalter auf der Gateway-Seite schaltet jetzt zuverlässig dauerhaft aus/ein (bleibt auch nach einem Neustart in dem gesetzten Zustand). Bisher konnte MQTT nach dem Ausschalten von selbst wieder aktiv werden.
+- **Verbesserung:** Der Footer der Gateway-Seite zeigt jetzt sowohl die Add-on-Version als auch die Bridge-Version an („Add-on vX · Bridge vY").
 
 ## 0.1.6
 - **Fix:** Re-Deploy oder Update der Bridge schlug mit „Text file busy" fehl — der Toggle-Dienst wird jetzt vor dem Ersetzen des Binarys korrekt gestoppt und danach wieder gestartet.
