@@ -102,7 +102,7 @@ directly — then pair it with **Apple Home, Google Home, or any Matter controll
 ### Steps
 
 1. **Download** `gardena-installer-windows.exe` from the
-   [latest release](https://github.com/wuselAUT/gardena-matter-bridge/releases/latest).
+   [latest release](https://github.com/wuselAUT/gardena-matter-mqtt-bridge/releases/latest).
 2. **Double-click** it. A console window opens (English + German).
 3. The installer **finds your gateway** automatically on the network and lists it — pick it,
    or enter the IP manually.

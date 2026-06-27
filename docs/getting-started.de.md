@@ -103,7 +103,7 @@ Gateway — danach koppelst du sie mit **Apple Home, Google Home oder jedem Matt
 ### Schritte
 
 1. **Lade** `gardena-installer-windows.exe` aus dem
-   [neuesten Release](https://github.com/wuselAUT/gardena-matter-bridge/releases/latest).
+   [neuesten Release](https://github.com/wuselAUT/gardena-matter-mqtt-bridge/releases/latest).
 2. **Doppelklick.** Ein Konsolenfenster öffnet sich (Englisch + Deutsch).
 3. Der Installer **findet dein Gateway** automatisch im Netz und listet es — auswählen,
    oder die IP manuell eingeben.
