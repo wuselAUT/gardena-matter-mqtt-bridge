@@ -1,0 +1,8 @@
+build/
+dist/
+*.exe
+__pycache__/
+*.pyc
+# staged copies (sources live in ../gardena_matter_bridge/)
+/orchestrate.py
+/bridge-release.lock

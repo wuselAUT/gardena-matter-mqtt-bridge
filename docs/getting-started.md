@@ -76,6 +76,48 @@ https://github.com/wuselAUT/gardena-matter-mqtt-bridge
     Accept the self-signed certificate warning once. Log in with the gateway password
     (first 8 characters of the device ID).
 
+## Standalone installer (Windows) — without Home Assistant
+
+Don't run Home Assistant? A small **Windows installer** deploys the bridge to your gateway
+directly — then pair it with **Apple Home, Google Home, or any Matter controller**.
+
+!!! info "Platforms"
+    The standalone installer is available for **Windows 10/11** today. **macOS and Linux
+    builds are planned.** On a machine that runs Home Assistant, the
+    [add-on path](#home-assistant-add-on-1-click-setup) above is the easiest route on any OS.
+
+### Prerequisites
+
+- **Windows 10 or 11.**
+- The **Windows "OpenSSH Client"** feature — the installer uses the built-in `ssh.exe`,
+  `scp.exe` and `ssh-keygen.exe`. **No PuTTY, no Git, no WSL** required.
+    - **Check:** open PowerShell and run `where.exe ssh` → it should print a path under
+      `C:\Windows\System32\OpenSSH\`.
+    - **Enable (if missing):** Settings → Apps → Optional Features → "Add a feature" →
+      **OpenSSH Client** → Install.
+- Computer and gateway on the **same local network**.
+- The gateway **device ID** from the sticker (a UUID-like value, e.g. `a1b2c3d4-…`).
+  This is **not** the `GARDENA-XXXXXX` network name.
+
+### Steps
+
+1. **Download** `gardena-installer-windows.exe` from the
+   [latest release](https://github.com/wuselAUT/gardena-matter-bridge/releases/latest).
+2. **Double-click** it. A console window opens (English + German).
+3. The installer **finds your gateway** automatically on the network and lists it — pick it,
+   or enter the IP manually.
+4. **Enter the device ID** from the sticker. The login password is derived automatically from
+   the first 8 characters; you never type the password, and it is never written to the log.
+5. The installer downloads the verified bridge package and **deploys it** (one to two minutes).
+   When finished, it opens your browser to the gateway's **pairing page**.
+
+Then continue with **[Pair the gateway](#pair-the-gateway-in-your-smart-home-app)** below.
+
+!!! tip "What it does under the hood"
+    It logs in to the gateway's web interface with your device ID, installs a one-time SSH
+    key, copies the bridge and starts it — the same proven flow as the Home Assistant add-on,
+    just driven from your PC. Everything stays local; nothing is sent to any cloud.
+
 ## Pair the gateway in your smart-home app
 
 ### Home Assistant
